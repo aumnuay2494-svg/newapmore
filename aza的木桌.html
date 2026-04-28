@@ -1,0 +1,4671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>星之塔罗 | Star Tarot</title>
+<style>
+:root {
+--bg-gradient-start: #0f0c29;
+--bg-gradient-mid: #302b63;
+--bg-gradient-end: #24243e;
+
+--accent-gold: #d4af37;
+--accent-gold-light: #f4e4bc;
+--accent-purple: #9d4edd;
+--accent-blue: #4cc9f0;
+
+--text-light: #e8e8e8;
+--text-muted: #a0a0a0;
+
+--card-width: 70px;
+--card-height: 110px;
+
+--glass-bg: rgba(255, 255, 255, 0.08);
+--glass-border: rgba(255, 255, 255, 0.15);
+}
+
+* {
+box-sizing: border-box;
+user-select: none;
+-webkit-user-select: none;
+-webkit-tap-highlight-color: transparent;
+}
+
+body, html {
+margin: 0;
+padding: 0;
+width: 100%;
+height: 100%;
+font-family: "PingFang SC", "Microsoft YaHei", serif;
+overflow: hidden;
+color: var(--text-light);
+}
+
+/* 背景动态星空 */
+.starfield {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+z-index: -2;
+}
+
+.stars-layer {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+overflow: hidden;
+}
+
+.star {
+position: absolute;
+background: white;
+border-radius: 50%;
+animation: twinkle var(--duration) infinite ease-in-out;
+box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.shooting-star {
+position: absolute;
+width: 100px;
+height: 2px;
+background: linear-gradient(90deg, rgba(255,255,255,0), white);
+animation: shoot 3s ease-in-out infinite;
+opacity: 0;
+}
+
+@keyframes twinkle {
+0%, 100% { transform: scale(0.5); opacity: 0.3; }
+50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes shoot {
+0% { transform: translateX(-100px) translateY(0); opacity: 0; }
+10% { opacity: 1; }
+30% { opacity: 1; }
+100% { transform: translateX(500px) translateY(200px); opacity: 0; }
+}
+
+/* 浮动粒子 */
+.particle {
+position: absolute;
+border-radius: 50%;
+pointer-events: none;
+animation: float-particle linear infinite;
+}
+
+@keyframes float-particle {
+0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+10% { opacity: 1; }
+90% { opacity: 1; }
+100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+}
+
+/* Page 1: 欢迎页 */
+#page1 {
+width: 100%;
+height: 100%;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+position: relative;
+z-index: 100;
+transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+#page1.fade-out {
+opacity: 0;
+transform: scale(1.1);
+}
+
+/* 魔法光环 */
+.magic-circle {
+position: relative;
+width: 220px;
+height: 220px;
+margin-bottom: 50px;
+}
+
+.circle-ring {
+position: absolute;
+border-radius: 50%;
+border: 2px solid;
+animation: rotate-ring linear infinite;
+}
+
+.ring-outer {
+width: 100%;
+height: 100%;
+border-color: var(--accent-gold);
+animation-duration: 20s;
+}
+
+.ring-middle {
+width: 85%;
+height: 85%;
+top: 7.5%;
+left: 7.5%;
+border-color: var(--accent-purple);
+border-style: dashed;
+animation-duration: 15s;
+animation-direction: reverse;
+}
+
+.ring-inner {
+width: 70%;
+height: 70%;
+top: 15%;
+left: 15%;
+border-color: var(--accent-blue);
+animation-duration: 10s;
+}
+
+@keyframes rotate-ring {
+from { transform: rotate(0deg); }
+to { transform: rotate(360deg); }
+}
+
+.magic-orb {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 120px;
+height: 120px;
+border-radius: 50%;
+background: radial-gradient(circle at 35% 35%,
+rgba(255,255,255,0.9),
+var(--accent-gold-light) 20%,
+var(--accent-gold) 60%,
+#8b6914);
+box-shadow:
+0 0 40px rgba(212, 175, 55, 0.5),
+0 0 80px rgba(212, 175, 55, 0.3),
+inset 0 -20px 40px rgba(0,0,0,0.2);
+animation: pulse-orb 3s ease-in-out infinite;
+}
+
+.magic-orb::before {
+content: "🔮";
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+font-size: 50px;
+filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+}
+
+@keyframes pulse-orb {
+0%, 100% {
+transform: translate(-50%, -50%) scale(1);
+box-shadow: 0 0 40px rgba(212, 175, 55, 0.5), 0 0 80px rgba(212, 175, 55, 0.3);
+}
+50% {
+transform: translate(-50%, -50%) scale(1.05);
+box-shadow: 0 0 60px rgba(212, 175, 55, 0.7), 0 0 100px rgba(212, 175, 55, 0.4);
+}
+}
+
+/* 介绍卡片 */
+.intro-card {
+width: 85%;
+max-width: 380px;
+background: var(--glass-bg);
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+border-radius: 24px;
+padding: 35px 30px;
+text-align: center;
+border: 1px solid var(--glass-border);
+box-shadow:
+0 20px 60px rgba(0, 0, 0, 0.3),
+inset 0 1px 0 rgba(255, 255, 255, 0.1);
+position: relative;
+overflow: hidden;
+}
+
+.intro-card::before {
+content: "";
+position: absolute;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background: linear-gradient(
+45deg,
+transparent,
+rgba(255, 255, 255, 0.03),
+transparent
+);
+animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+0% { transform: translateX(-100%) rotate(45deg); }
+100% { transform: translateX(100%) rotate(45deg); }
+}
+
+.intro-title {
+font-size: 22px;
+font-weight: 600;
+color: var(--accent-gold);
+margin-bottom: 15px;
+letter-spacing: 3px;
+text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.intro-divider {
+width: 60px;
+height: 2px;
+background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+margin: 0 auto 15px;
+}
+
+.intro-text {
+font-size: 14px;
+color: var(--text-muted);
+line-height: 1.8;
+margin-bottom: 25px;
+}
+
+.start-btn {
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+color: #1a1a2e;
+border: none;
+padding: 14px 50px;
+font-size: 16px;
+font-weight: 600;
+border-radius: 50px;
+cursor: pointer;
+letter-spacing: 2px;
+box-shadow:
+0 8px 25px rgba(212, 175, 55, 0.4),
+inset 0 1px 0 rgba(255, 255, 255, 0.3);
+transition: all 0.3s ease;
+position: relative;
+overflow: hidden;
+z-index: 10;
+}
+
+.start-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 12px 35px rgba(212, 175, 55, 0.5);
+}
+
+.start-btn:active {
+transform: translateY(0) scale(0.98);
+}
+
+.footer-credit {
+position: absolute;
+bottom: 25px;
+font-size: 11px;
+color: rgba(255, 255, 255, 0.3);
+letter-spacing: 1px;
+}
+
+/* Page 2: 塔罗主界面 */
+#page2 {
+display: none;
+width: 100%;
+height: 100%;
+flex-direction: column;
+position: relative;
+z-index: 100;
+}
+
+/* 顶栏 */
+.top-bar {
+height: 65px;
+width: 100%;
+background: var(--glass-bg);
+backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 0 20px;
+border-bottom: 1px solid var(--glass-border);
+z-index: 100;
+position: relative;
+overflow: hidden;
+}
+
+.top-bar-bg {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
+object-position: center;
+z-index: -1;
+opacity: 0.6;
+}
+
+.top-icon-btn {
+width: 44px;
+height: 44px;
+border-radius: 14px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 22px;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+cursor: pointer;
+transition: all 0.3s ease;
+overflow: hidden;
+position: relative;
+}
+
+.top-icon-btn img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+position: absolute;
+top: 0;
+left: 0;
+}
+
+.top-icon-btn:hover {
+background: rgba(255, 255, 255, 0.15);
+transform: scale(1.05);
+}
+
+.top-title {
+font-size: 18px;
+font-weight: 600;
+color: var(--accent-gold);
+letter-spacing: 3px;
+text-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* 桌面区域 */
+.table-area {
+flex: 1;
+position: relative;
+width: 100%;
+overflow: hidden;
+perspective: 1200px;
+}
+
+.table-bg {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
+object-position: center;
+z-index: -1;
+opacity: 0.5;
+}
+
+/* 桌面装饰 */
+.table-decoration {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 280px;
+height: 280px;
+opacity: 0.15;
+pointer-events: none;
+}
+
+.deco-circle {
+position: absolute;
+border-radius: 50%;
+border: 1px solid var(--accent-gold);
+}
+
+.deco-outer {
+width: 100%;
+height: 100%;
+animation: rotate-ring 60s linear infinite;
+}
+
+.deco-inner {
+width: 60%;
+height: 60%;
+top: 20%;
+left: 20%;
+border-style: dashed;
+animation: rotate-ring 40s linear infinite reverse;
+}
+
+/* 控制按钮层 */
+.controls-layer {
+position: absolute;
+bottom: 25px;
+width: 100%;
+display: flex;
+justify-content: space-between;
+padding: 0 25px;
+pointer-events: none;
+z-index: 50;
+}
+
+/* 左侧按钮组 */
+.left-btns {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+/* 统一小按钮样式 */
+.small-btn {
+pointer-events: auto;
+width: 50px;
+height: 50px;
+border-radius: 50%;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+border: 2px solid var(--glass-border);
+backdrop-filter: blur(10px);
+transition: all 0.3s ease;
+position: relative;
+overflow: hidden;
+}
+
+.small-btn::before {
+content: "";
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+pointer-events: none;
+}
+
+.small-btn span {
+font-size: 18px;
+}
+
+.small-btn img.btn-custom-img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+position: absolute;
+top: 0;
+left: 0;
+border-radius: 50%;
+}
+
+.small-btn small {
+font-size: 8px;
+color: var(--text-light);
+letter-spacing: 0.5px;
+}
+
+.small-btn:active {
+transform: scale(0.92);
+}
+
+.btn-shuffle {
+background: linear-gradient(135deg, rgba(157, 78, 221, 0.6), rgba(76, 201, 240, 0.6));
+box-shadow: 0 5px 15px rgba(157, 78, 221, 0.3);
+}
+
+.btn-mode {
+background: linear-gradient(135deg, rgba(76, 201, 240, 0.5), rgba(157, 78, 221, 0.5));
+box-shadow: 0 5px 15px rgba(76, 201, 240, 0.3);
+}
+
+.action-btn {
+pointer-events: auto;
+width: 70px;
+height: 70px;
+border-radius: 50%;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+border: 2px solid var(--glass-border);
+backdrop-filter: blur(10px);
+transition: all 0.3s ease;
+position: relative;
+overflow: hidden;
+}
+
+.action-btn::before {
+content: "";
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+pointer-events: none;
+}
+
+.action-btn span {
+font-size: 24px;
+margin-bottom: 2px;
+}
+
+.action-btn img.btn-custom-img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+position: absolute;
+top: 0;
+left: 0;
+border-radius: 50%;
+}
+
+.action-btn small {
+font-size: 10px;
+color: var(--text-light);
+letter-spacing: 1px;
+}
+
+.btn-deck {
+background: linear-gradient(135deg, rgba(212, 175, 55, 0.6), rgba(139, 105, 20, 0.6));
+box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+}
+
+.btn-deck:active {
+transform: scale(0.92);
+}
+
+/* 动画层 */
+.anim-layer {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+z-index: 200;
+}
+
+/* 底栏牌库 */
+.bottom-dock {
+height: 150px;
+width: 100%;
+background: linear-gradient(180deg, rgba(15, 12, 41, 0.9), rgba(15, 12, 41, 0.98));
+border-top: 1px solid var(--accent-gold);
+box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+display: flex;
+align-items: center;
+overflow-x: auto;
+padding: 0 25px;
+z-index: 100;
+cursor: grab;
+scrollbar-width: none;
+position: relative;
+}
+
+.bottom-dock-bg {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+object-fit: cover;
+object-position: center;
+z-index: -1;
+opacity: 0.5;
+}
+
+.bottom-dock::before {
+content: "";
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+height: 1px;
+background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+}
+
+.bottom-dock:active { cursor: grabbing; }
+.bottom-dock::-webkit-scrollbar { display: none; }
+
+/* 牌组容器 - 用于重叠布局 */
+.cards-wrapper {
+display: flex;
+align-items: center;
+position: relative;
+padding-left: 20px;
+padding-right: 60px;
+min-width: max-content;
+}
+
+/* 扇形模式 - 重叠排列 */
+.cards-wrapper.fan-mode .card-container {
+margin-right: -45px;
+transition: transform 0.3s ease, margin 0.3s ease;
+}
+
+.cards-wrapper.fan-mode .card-container:hover {
+transform: translateY(-15px);
+z-index: 100;
+}
+
+.cards-wrapper.fan-mode .card-container:hover ~ .card-container {
+margin-left: 25px;
+}
+
+/* 单张模式 - 叠成一堆 */
+.cards-wrapper.stack-mode {
+justify-content: center;
+width: 100%;
+padding: 0;
+}
+
+.cards-wrapper.stack-mode .card-container {
+position: absolute;
+left: 50%;
+transform: translateX(-50%);
+margin: 0;
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cards-wrapper.stack-mode .card-container:hover {
+transform: translateX(-50%) translateY(-8px);
+}
+
+/* 牌组数量指示 */
+.deck-counter {
+position: absolute;
+top: 8px;
+right: 25px;
+font-size: 12px;
+color: var(--accent-gold);
+letter-spacing: 1px;
+z-index: 101;
+}
+
+/* 卡牌样式 */
+.card-container {
+width: var(--card-width);
+height: var(--card-height);
+position: relative;
+perspective: 1000px;
+flex-shrink: 0;
+transition: transform 0.3s ease;
+cursor: grab;
+}
+
+.card-container:active {
+cursor: grabbing;
+}
+
+.card-inner {
+position: relative;
+width: 100%;
+height: 100%;
+text-align: center;
+transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+transform-style: preserve-3d;
+border-radius: 10px;
+}
+
+.card-back, .card-front {
+position: absolute;
+width: 100%;
+height: 100%;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+border-radius: 10px;
+}
+
+.card-back {
+background: linear-gradient(135deg, #1a1a3e, #2d2d5a);
+border: 2px solid var(--accent-gold);
+display: flex;
+align-items: center;
+justify-content: center;
+box-shadow:
+0 4px 15px rgba(0, 0, 0, 0.3),
+inset 0 0 20px rgba(212, 175, 55, 0.1);
+overflow: hidden;
+}
+
+.card-back-img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+position: absolute;
+top: 0;
+left: 0;
+border-radius: 8px;
+}
+
+.card-back::before {
+content: "";
+position: absolute;
+width: 50px;
+height: 50px;
+border: 1px solid rgba(212, 175, 55, 0.3);
+border-radius: 50%;
+}
+
+.card-back::after {
+content: "✦";
+color: var(--accent-gold);
+font-size: 20px;
+text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.card-back.has-custom-img::before,
+.card-back.has-custom-img::after {
+display: none;
+}
+
+.card-front {
+transform: rotateY(180deg);
+background: linear-gradient(180deg, #faf8f0, #f0ebe0);
+border: 2px solid var(--accent-gold);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.card-front-img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+position: absolute;
+top: 0;
+left: 0;
+border-radius: 8px;
+}
+
+.card-content-wrap {
+width: 100%;
+height: 100%;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 8px;
+}
+
+.card-icon {
+font-size: 28px;
+margin-bottom: 5px;
+}
+
+.card-name {
+font-size: 9px;
+color: #333;
+font-weight: 600;
+letter-spacing: 1px;
+text-align: center;
+}
+
+.card-container.flipped .card-inner {
+transform: rotateY(180deg);
+}
+
+.card-container.reversed .card-content-wrap {
+transform: rotate(180deg);
+}
+
+.card-container.dragging {
+position: fixed !important;
+z-index: 9999 !important;
+pointer-events: none;
+transform: scale(1.15) !important;
+filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.4));
+transition: none !important;
+}
+
+.card-container.on-table {
+position: absolute;
+margin: 0;
+filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
+cursor: pointer;
+}
+
+.card-container.on-table:active {
+cursor: grabbing;
+}
+
+/* 洗牌动画用的临时卡牌 */
+.shuffle-card {
+position: absolute;
+width: 70px;
+height: 110px;
+border-radius: 10px;
+background: linear-gradient(135deg, #1a1a3e, #2d2d5a);
+border: 2px solid var(--accent-gold);
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.shuffle-card::after {
+content: "✦";
+color: var(--accent-gold);
+font-size: 20px;
+}
+
+/* Modal 弹窗 */
+.modal-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.6);
+backdrop-filter: blur(8px);
+-webkit-backdrop-filter: blur(8px);
+z-index: 2000;
+display: none;
+align-items: center;
+justify-content: center;
+}
+
+.modal-card {
+background: linear-gradient(180deg, #2a2a4a, #1a1a2e);
+width: 85%;
+max-width: 340px;
+padding: 30px 25px;
+border-radius: 20px;
+text-align: center;
+border: 1px solid var(--glass-border);
+box-shadow:
+0 25px 60px rgba(0, 0, 0, 0.5),
+inset 0 1px 0 rgba(255, 255, 255, 0.1);
+animation: modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modal-pop {
+from { transform: scale(0.8) translateY(20px); opacity: 0; }
+to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.modal-icon {
+font-size: 50px;
+margin-bottom: 10px;
+}
+
+.modal-name {
+font-size: 24px;
+font-weight: 600;
+color: var(--accent-gold);
+margin-bottom: 5px;
+letter-spacing: 2px;
+}
+
+.modal-status {
+font-size: 14px;
+font-weight: 600;
+margin-bottom: 20px;
+padding: 5px 20px;
+border-radius: 20px;
+display: inline-block;
+}
+
+.modal-status.upright {
+background: rgba(212, 175, 55, 0.2);
+color: var(--accent-gold);
+}
+
+.modal-status.reversed {
+background: rgba(157, 78, 221, 0.2);
+color: var(--accent-purple);
+}
+
+.modal-divider {
+width: 80px;
+height: 1px;
+background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
+margin: 0 auto 20px;
+}
+
+.modal-meaning {
+background: rgba(0, 0, 0, 0.2);
+padding: 18px;
+border-radius: 12px;
+color: var(--text-muted);
+font-size: 14px;
+text-align: left;
+line-height: 1.8;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-close-btn {
+margin-top: 25px;
+padding: 12px 40px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+color: #1a1a2e;
+border: none;
+border-radius: 25px;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+letter-spacing: 2px;
+transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+/* 提示文字 */
+.hint-text {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+color: rgba(255, 255, 255, 0.15);
+font-size: 14px;
+letter-spacing: 3px;
+pointer-events: none;
+text-align: center;
+}
+
+/* ========== 设置页面样式 ========== */
+.settings-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.85);
+backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
+z-index: 3000;
+display: none;
+align-items: flex-start;
+justify-content: center;
+overflow-y: auto;
+padding: 20px;
+}
+
+.settings-overlay.show {
+display: flex;
+}
+
+.settings-panel {
+background: linear-gradient(180deg, #2a2a4a, #1a1a2e);
+width: 100%;
+max-width: 400px;
+padding: 25px;
+border-radius: 20px;
+border: 1px solid var(--glass-border);
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+animation: modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+margin: 20px 0;
+}
+
+.settings-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 25px;
+padding-bottom: 15px;
+border-bottom: 1px solid var(--glass-border);
+}
+
+.settings-title {
+font-size: 20px;
+font-weight: 600;
+color: var(--accent-gold);
+letter-spacing: 2px;
+}
+
+.settings-close {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+font-size: 18px;
+transition: all 0.3s ease;
+}
+
+.settings-close:hover {
+background: rgba(255, 255, 255, 0.2);
+transform: rotate(90deg);
+}
+
+.settings-section {
+margin-bottom: 25px;
+}
+
+.settings-section-title {
+font-size: 14px;
+color: var(--accent-gold);
+margin-bottom: 15px;
+letter-spacing: 1px;
+display: flex;
+align-items: center;
+gap:8px;
+}
+
+.settings-section-title::before {
+content: "✦";
+font-size: 10px;
+}
+
+.setting-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 15px;
+background: rgba(0, 0, 0, 0.2);
+border-radius: 12px;
+margin-bottom: 10px;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.setting-label {
+display: flex;
+flex-direction: column;
+gap: 3px;
+}
+
+.setting-label span {
+font-size: 14px;
+color: var(--text-light);
+}
+
+.setting-label small {
+font-size: 11px;
+color: var(--text-muted);
+}
+
+/* 开关样式 */
+.toggle-switch {
+position: relative;
+width: 50px;
+height: 26px;
+background: rgba(255, 255, 255, 0.1);
+border-radius: 13px;
+cursor: pointer;
+transition: all 0.3s ease;
+border: 1px solid var(--glass-border);
+}
+
+.toggle-switch.active {
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+}
+
+.toggle-switch::after {
+content: "";
+position: absolute;
+width: 20px;
+height: 20px;
+background: white;
+border-radius: 50%;
+top: 2px;
+left: 3px;
+transition: all 0.3s ease;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-switch.active::after {
+left: 26px;
+}
+
+/* 滑块样式 */
+.slider-container {
+width: 120px;
+}
+
+.slider {
+-webkit-appearance: none;
+width: 100%;
+height: 6px;
+border-radius: 3px;
+background: rgba(255, 255, 255, 0.1);
+outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+-webkit-appearance: none;
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+cursor: pointer;
+box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+}
+
+.slider::-moz-range-thumb {
+width: 18px;
+height: 18px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+cursor: pointer;
+border: none;
+}
+
+/* 选择按钮组 */
+.option-group {
+display: flex;
+gap: 8px;
+}
+
+.option-btn {
+padding: 8px 14px;
+border-radius: 20px;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+color: var(--text-muted);
+font-size: 12px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.option-btn.active {
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+color: #1a1a2e;
+border-color: transparent;
+}
+
+.option-btn:hover:not(.active) {
+background: rgba(255, 255, 255, 0.15);
+color: var(--text-light);
+}
+
+/* 关于信息 */
+.about-section {
+text-align: center;
+padding: 20px;
+background: rgba(0, 0, 0, 0.2);
+border-radius: 12px;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.about-logo {
+font-size: 40px;
+margin-bottom: 10px;
+}
+
+.about-name {
+font-size: 18px;
+color: var(--accent-gold);
+margin-bottom: 5px;
+letter-spacing: 2px;
+}
+
+.about-version {
+font-size: 12px;
+color: var(--text-muted);
+margin-bottom: 15px;
+}
+
+.about-desc {
+font-size: 13px;
+color: var(--text-muted);
+line-height: 1.6;
+margin-bottom: 15px;
+}
+
+.about-credit {
+font-size: 11px;
+color: rgba(255, 255, 255, 0.3);
+}
+
+/* 重置按钮 */
+.reset-btn {
+width: 100%;
+padding: 14px;
+background: rgba(255, 100, 100, 0.2);
+border: 1px solid rgba(255, 100, 100, 0.3);
+border-radius: 12px;
+color: #ff9999;
+font-size: 14px;
+cursor: pointer;
+transition: all 0.3s ease;
+margin-top: 10px;
+}
+
+.reset-btn:hover {
+background: rgba(255, 100, 100, 0.3);
+}
+
+/* ========== 主题页面样式 ========== */
+.theme-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.9);
+backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
+z-index: 3000;
+display: none;
+align-items: flex-start;
+justify-content: center;
+overflow-y: auto;
+padding: 20px;
+}
+
+.theme-overlay.show {
+display: flex;
+}
+
+.theme-panel {
+background: linear-gradient(180deg, #2a2a4a, #1a1a2e);
+width: 100%;
+max-width: 420px;
+padding: 25px;
+border-radius: 20px;
+border: 1px solid var(--glass-border);
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+animation: modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+margin: 20px 0;
+}
+
+.theme-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+padding-bottom: 15px;
+border-bottom: 1px solid var(--glass-border);
+}
+
+.theme-title {
+font-size: 20px;
+font-weight: 600;
+color: var(--accent-gold);
+letter-spacing: 2px;
+}
+
+.theme-close {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+font-size: 18px;
+transition: all 0.3s ease;
+}
+
+.theme-close:hover {
+background: rgba(255, 255, 255, 0.2);
+transform: rotate(90deg);
+}
+
+.theme-tip {
+background: rgba(212, 175, 55, 0.15);
+border: 1px solid rgba(212, 175, 55, 0.3);
+border-radius: 10px;
+padding: 12px 15px;
+margin-bottom: 20px;
+font-size: 12px;
+color: var(--accent-gold-light);
+line-height: 1.6;
+}
+
+.theme-tip::before {
+content: "💡 ";
+}
+
+.theme-section {
+margin-bottom: 25px;
+}
+
+.theme-section-title {
+font-size: 14px;
+color: var(--accent-gold);
+margin-bottom: 15px;
+letter-spacing: 1px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.theme-section-title::before {
+content: "✦";
+font-size: 10px;
+}
+
+.theme-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 15px;
+background: rgba(0, 0, 0, 0.2);
+border-radius: 12px;
+margin-bottom: 10px;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.theme-item-label {
+font-size: 13px;
+color: var(--text-light);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.theme-item-label .preview-icon {
+width: 24px;
+height: 24px;
+border-radius: 6px;
+background: rgba(255, 255, 255, 0.1);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 14px;
+overflow: hidden;
+}
+
+.theme-item-label .preview-icon img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.theme-item-actions {
+display: flex;
+gap: 8px;
+}
+
+.theme-input-url {
+width: 100px;
+padding: 6px 10px;
+border-radius: 8px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 11px;
+outline: none;
+transition: all 0.3s ease;
+}
+
+.theme-input-url:focus {
+border-color: var(--accent-gold);
+background: rgba(0, 0, 0, 0.5);
+}
+
+.theme-input-url::placeholder {
+color: var(--text-muted);
+}
+
+.theme-btn-upload {
+padding: 6px 12px;
+border-radius: 8px;
+background: rgba(157, 78, 221, 0.3);
+border: 1px solid rgba(157, 78, 221, 0.5);
+color: var(--text-light);
+font-size: 11px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.theme-btn-upload:hover {
+background: rgba(157, 78, 221, 0.5);
+}
+
+.theme-btn-clear {
+padding: 6px 10px;
+border-radius: 8px;
+background: rgba(255, 100, 100, 0.2);
+border: 1px solid rgba(255, 100, 100, 0.3);
+color: #ff9999;
+font-size: 11px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.theme-btn-clear:hover {
+background: rgba(255, 100, 100, 0.4);
+}
+
+.theme-save-btn {
+width: 100%;
+padding: 14px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+border: none;
+border-radius: 12px;
+color: #1a1a2e;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+letter-spacing: 2px;
+margin-top: 10px;
+}
+
+.theme-save-btn:hover {
+transform: scale(1.02);
+box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+/* 导入导出区域 */
+.theme-io-section {
+background: rgba(0, 0, 0, 0.2);
+border-radius: 12px;
+padding: 15px;
+margin-bottom: 20px;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.theme-io-title {
+font-size: 13px;
+color: var(--accent-blue);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.theme-io-btns {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.theme-io-btn {
+flex: 1;
+min-width: 120px;
+padding: 10px 15px;
+border-radius: 10px;
+background: rgba(76, 201, 240, 0.2);
+border: 1px solid rgba(76, 201, 240, 0.3);
+color: var(--accent-blue);
+font-size: 12px;
+cursor: pointer;
+transition: all 0.3s ease;
+text-align: center;
+}
+
+.theme-io-btn:hover {
+background: rgba(76, 201, 240, 0.3);
+transform: translateY(-2px);
+}
+
+.theme-io-btn.import-btn {
+background: rgba(157, 78, 221, 0.2);
+border-color: rgba(157, 78, 221, 0.3);
+color: var(--accent-purple);
+}
+
+.theme-io-btn.import-btn:hover {
+background: rgba(157, 78, 221, 0.3);
+}
+
+/* 预设管理区域 */
+.preset-section {
+background: rgba(0, 0, 0, 0.2);
+border-radius: 12px;
+padding: 15px;
+margin-bottom: 20px;
+border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.preset-title {
+font-size: 13px;
+color: var(--accent-gold);
+margin-bottom: 12px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.preset-save-row {
+display: flex;
+gap: 10px;
+margin-bottom: 15px;
+}
+
+.preset-name-input {
+flex: 1;
+padding: 10px 12px;
+border-radius: 10px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 13px;
+outline: none;
+}
+
+.preset-name-input:focus {
+border-color: var(--accent-gold);
+}
+
+.preset-name-input::placeholder {
+color: var(--text-muted);
+}
+
+.preset-save-btn {
+padding: 10px 20px;
+border-radius: 10px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+border: none;
+color: #1a1a2e;
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+white-space: nowrap;
+}
+
+.preset-save-btn:hover {
+transform: scale(1.05);
+}
+
+.preset-list {
+max-height: 200px;
+overflow-y: auto;
+}
+
+.preset-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 12px;
+background: rgba(255, 255, 255, 0.05);
+border-radius: 8px;
+margin-bottom: 8px;
+border: 1px solid transparent;
+transition: all 0.3s ease;
+}
+
+.preset-item:hover {
+background: rgba(255, 255, 255, 0.08);
+}
+
+.preset-item.active {
+border-color: var(--accent-gold);
+background: rgba(212, 175, 55, 0.1);
+}
+
+.preset-item-name {
+font-size: 13px;
+color: var(--text-light);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.preset-item-name .preset-icon {
+font-size: 16px;
+}
+
+.preset-item-actions {
+display: flex;
+gap: 6px;
+}
+
+.preset-apply-btn {
+padding: 5px 12px;
+border-radius: 6px;
+background: rgba(76, 201, 240, 0.3);
+border: 1px solid rgba(76, 201, 240, 0.5);
+color: var(--accent-blue);
+font-size: 11px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.preset-apply-btn:hover {
+background: rgba(76, 201, 240, 0.5);
+}
+
+.preset-delete-btn {
+padding: 5px 10px;
+border-radius: 6px;
+background: rgba(255, 100, 100, 0.2);
+border: 1px solid rgba(255, 100, 100, 0.3);
+color: #ff9999;
+font-size: 11px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.preset-delete-btn:hover {
+background: rgba(255, 100, 100, 0.4);
+}
+
+.preset-empty {
+text-align: center;
+padding: 20px;
+color: var(--text-muted);
+font-size: 12px;
+}
+
+/* 隐藏的文件输入 */
+.hidden-file-input {
+display: none;
+}
+
+/* ========== 牌组设置页面样式 ========== */
+.deck-settings-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.9);
+backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
+z-index: 3000;
+display: none;
+align-items: flex-start;
+justify-content: center;
+overflow-y: auto;
+padding: 20px;
+}
+
+.deck-settings-overlay.show {
+display: flex;
+}
+
+.deck-settings-panel {
+background: linear-gradient(180deg, #2a2a4a, #1a1a2e);
+width: 100%;
+max-width: 450px;
+padding: 25px;
+border-radius: 20px;
+border: 1px solid var(--glass-border);
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+animation: modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+margin: 20px 0;
+}
+
+.deck-settings-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+padding-bottom: 15px;
+border-bottom: 1px solid var(--glass-border);
+}
+
+.deck-settings-title {
+font-size: 20px;
+font-weight: 600;
+color: var(--accent-gold);
+letter-spacing: 2px;
+}
+
+.deck-settings-close {
+width: 36px;
+height: 36px;
+border-radius: 50%;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+font-size: 18px;
+transition: all 0.3s ease;
+}
+
+.deck-settings-close:hover {
+background: rgba(255, 255, 255, 0.2);
+transform: rotate(90deg);
+}
+
+.deck-section {
+margin-bottom: 25px;
+}
+
+.deck-section-title {
+font-size: 14px;
+color: var(--accent-gold);
+margin-bottom: 15px;
+letter-spacing: 1px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.deck-section-title::before {
+content: "✦";
+font-size: 10px;
+}
+
+/* 牌组选择区域 */
+.deck-select-row {
+display: flex;
+gap: 10px;
+align-items: center;
+margin-bottom: 15px;
+}
+
+.deck-select {
+flex: 1;
+padding: 12px 15px;
+border-radius: 10px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 14px;
+outline: none;
+cursor: pointer;
+}
+
+.deck-select:focus {
+border-color: var(--accent-gold);
+}
+
+.deck-apply-btn {
+padding: 12px 20px;
+border-radius: 10px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+border: none;
+color: #1a1a2e;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.deck-apply-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+}
+
+/* 牌组操作按钮 */
+.deck-action-btns {
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.deck-action-btn {
+flex: 1;
+min-width: 120px;
+padding: 12px 15px;
+border-radius: 10px;
+background: rgba(76, 201, 240, 0.2);
+border: 1px solid rgba(76, 201, 240, 0.3);
+color: var(--accent-blue);
+font-size: 13px;
+cursor: pointer;
+transition: all 0.3s ease;
+text-align: center;
+}
+
+.deck-action-btn:hover {
+background: rgba(76, 201, 240, 0.3);
+transform: translateY(-2px);
+}
+
+.deck-action-btn.upload-btn {
+background: rgba(157, 78, 221, 0.2);
+border-color: rgba(157, 78, 221, 0.3);
+color: var(--accent-purple);
+}
+
+.deck-action-btn.upload-btn:hover {
+background: rgba(157, 78, 221, 0.3);
+}
+
+/* 已保存牌组列表 */
+.saved-decks-list {
+max-height: 300px;
+overflow-y: auto;
+}
+
+.saved-deck-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 15px;
+background: rgba(255, 255, 255, 0.05);
+border-radius: 10px;
+margin-bottom: 10px;
+border: 1px solid transparent;
+transition: all 0.3s ease;
+}
+
+.saved-deck-item:hover {
+background: rgba(255, 255, 255, 0.08);
+}
+
+.saved-deck-item.active {
+border-color: var(--accent-gold);
+background: rgba(212, 175, 55, 0.1);
+}
+
+.saved-deck-info {
+display: flex;
+align-items: center;
+gap: 12px;
+}
+
+.saved-deck-preview {
+width: 40px;
+height: 60px;
+border-radius: 6px;
+background: linear-gradient(135deg, #1a1a3e, #2d2d5a);
+border: 1px solid var(--accent-gold);
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
+
+.saved-deck-preview img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.saved-deck-preview span {
+font-size: 16px;
+}
+
+.saved-deck-details {
+display: flex;
+flex-direction: column;
+gap: 3px;
+}
+
+.saved-deck-name {
+font-size: 14px;
+color: var(--text-light);
+font-weight: 500;
+}
+
+.saved-deck-count {
+font-size: 11px;
+color: var(--text-muted);
+}
+
+.saved-deck-actions {
+display: flex;
+gap: 8px;
+}
+
+.deck-edit-btn {
+padding: 6px 12px;
+border-radius: 6px;
+background: rgba(76, 201, 240, 0.3);
+border: 1px solid rgba(76, 201, 240, 0.5);
+color: var(--accent-blue);
+font-size: 11px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.deck-edit-btn:hover {
+background: rgba(76, 201, 240, 0.5);
+}
+
+.deck-delete-btn {
+padding: 6px 10px;
+border-radius: 6px;
+background: rgba(255, 100, 100, 0.2);
+border: 1px solid rgba(255, 100, 100, 0.3);
+color: #ff9999;
+font-size: 11px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.deck-delete-btn:hover {
+background: rgba(255, 100, 100, 0.4);
+}
+
+.no-decks-msg {
+text-align: center;
+padding: 30px;
+color: var(--text-muted);
+font-size: 13px;
+}
+
+/* ========== 上传牌组页面样式 ========== */
+.upload-deck-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.95);
+backdrop-filter: blur(15px);
+-webkit-backdrop-filter: blur(15px);
+z-index: 4000;
+display: none;
+align-items: flex-start;
+justify-content: center;
+overflow-y: auto;
+padding: 20px;
+}
+
+.upload-deck-overlay.show {
+display: flex;
+}
+
+.upload-deck-panel {
+background: linear-gradient(180deg, #2a2a4a, #1a1a2e);
+width: 100%;
+max-width: 500px;
+padding: 25px;
+border-radius: 20px;
+border: 1px solid var(--glass-border);
+box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+animation: modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+margin: 20px 0;
+}
+
+.upload-deck-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 20px;
+padding-bottom: 15px;
+border-bottom: 1px solid var(--glass-border);
+}
+
+.upload-deck-title {
+font-size: 20px;
+font-weight: 600;
+color: var(--accent-gold);
+letter-spacing: 2px;
+}
+
+/* 牌组基本信息 */
+.deck-basic-info {
+margin-bottom: 25px;
+}
+
+.deck-info-row {
+display: flex;
+gap: 15px;
+margin-bottom: 15px;
+flex-wrap: wrap;
+}
+
+.deck-info-item {
+flex: 1;
+min-width: 150px;
+}
+
+.deck-info-label {
+font-size: 12px;
+color: var(--accent-gold);
+margin-bottom: 8px;
+display: block;
+}
+
+.deck-info-input {
+width: 100%;
+padding: 10px 12px;
+border-radius: 8px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 13px;
+outline: none;
+}
+
+.deck-info-input:focus {
+border-color: var(--accent-gold);
+}
+
+.deck-info-input::placeholder {
+color: var(--text-muted);
+}
+
+/* 牌面列表区域 */
+.cards-list-section {
+margin-bottom: 25px;
+}
+
+.cards-list-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 15px;
+}
+
+.cards-list-title {
+font-size: 14px;
+color: var(--accent-gold);
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.cards-list-title::before {
+content: "✦";
+font-size: 10px;
+}
+
+.add-card-btn {
+padding: 8px 15px;
+border-radius: 20px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+border: none;
+color: #1a1a2e;
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.add-card-btn:hover {
+transform: scale(1.05);
+}
+
+.cards-list-container {
+max-height: 400px;
+overflow-y: auto;
+padding-right: 5px;
+}
+
+/* 单张牌面编辑项 */
+.card-edit-item {
+display: flex;
+gap: 15px;
+padding: 15px;
+background: rgba(0, 0, 0, 0.2);
+border-radius: 12px;
+margin-bottom: 12px;
+border: 1px solid rgba(255, 255, 255, 0.05);
+position: relative;
+}
+
+.card-edit-item:hover {
+background: rgba(0, 0, 0, 0.3);
+}
+
+.card-preview-col {
+width: 70px;
+flex-shrink: 0;
+}
+
+.card-preview-box {
+width: 70px;
+height: 100px;
+border-radius: 8px;
+background: linear-gradient(135deg, #1a1a3e, #2d2d5a);
+border: 2px solid var(--accent-gold);
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+margin-bottom: 8px;
+}
+
+.card-preview-box img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.card-preview-box span {
+font-size: 24px;
+color: var(--accent-gold);
+}
+
+.card-front-input {
+width: 100%;
+padding: 6px 8px;
+border-radius: 6px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 10px;
+outline: none;
+}
+
+.card-front-input::placeholder {
+color: var(--text-muted);
+}
+
+.card-info-col {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.card-info-row {
+display: flex;
+gap: 10px;
+}
+
+.card-info-field {
+flex: 1;
+}
+
+.card-info-field label {
+font-size: 11px;
+color: var(--text-muted);
+margin-bottom: 4px;
+display: block;
+}
+
+.card-info-field input,
+.card-info-field textarea {
+width: 100%;
+padding: 8px 10px;
+border-radius: 6px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 12px;
+outline: none;
+resize: none;
+}
+
+.card-info-field input:focus,
+.card-info-field textarea:focus {
+border-color: var(--accent-gold);
+}
+
+.card-info-field textarea {
+min-height: 50px;
+}
+
+.card-type-select {
+padding: 8px 10px;
+border-radius: 6px;
+border: 1px solid var(--glass-border);
+background: rgba(0, 0, 0, 0.3);
+color: var(--text-light);
+font-size: 12px;
+outline: none;
+cursor: pointer;
+}
+
+.card-delete-btn {
+position: absolute;
+top: 10px;
+right: 10px;
+width: 24px;
+height: 24px;
+border-radius: 50%;
+background: rgba(255, 100, 100, 0.3);
+border: 1px solid rgba(255, 100, 100, 0.5);
+color: #ff9999;
+font-size: 12px;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+}
+
+.card-delete-btn:hover {
+background: rgba(255, 100, 100, 0.5);
+transform: scale(1.1);
+}
+
+/* 批量操作区域 */
+.batch-operations {
+display: flex;
+gap: 10px;
+margin-bottom: 20px;
+flex-wrap: wrap;
+}
+
+.batch-btn {
+flex: 1;
+min-width: 120px;
+padding: 12px 15px;
+border-radius: 10px;
+font-size: 12px;
+cursor: pointer;
+transition: all 0.3s ease;
+text-align: center;
+border: 1px solid;
+}
+
+.batch-export-btn {
+background: rgba(76, 201, 240, 0.2);
+border-color: rgba(76, 201, 240, 0.3);
+color: var(--accent-blue);
+}
+
+.batch-export-btn:hover {
+background: rgba(76, 201, 240, 0.3);
+}
+
+.batch-import-btn {
+background: rgba(157, 78, 221, 0.2);
+border-color: rgba(157, 78, 221, 0.3);
+color: var(--accent-purple);
+}
+
+.batch-import-btn:hover {
+background: rgba(157, 78, 221, 0.3);
+}
+
+/* 底部按钮 */
+.upload-deck-footer {
+display: flex;
+gap: 15px;
+margin-top: 20px;
+}
+
+.deck-save-btn {
+flex: 1;
+padding: 14px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+border: none;
+border-radius: 12px;
+color: #1a1a2e;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.deck-save-btn:hover {
+transform: scale(1.02);
+box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+}
+
+.deck-exit-btn {
+flex: 1;
+padding: 14px;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+border-radius: 12px;
+color: var(--text-light);
+font-size: 14px;
+cursor: pointer;
+transition: all 0.3s ease;
+}
+
+.deck-exit-btn:hover {
+background: rgba(255, 255, 255, 0.15);
+}
+
+/* 确认弹窗 */
+.confirm-modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.8);
+z-index: 5000;
+display: none;
+align-items: center;
+justify-content: center;
+}
+
+.confirm-modal.show {
+display: flex;
+}
+
+.confirm-box {
+background: linear-gradient(180deg, #2a2a4a, #1a1a2e);
+padding: 30px;
+border-radius: 20px;
+border: 1px solid var(--glass-border);
+text-align: center;
+max-width: 320px;
+animation: modal-pop 0.3s ease;
+}
+
+.confirm-icon {
+font-size: 50px;
+margin-bottom: 15px;
+}
+
+.confirm-text {
+font-size: 16px;
+color: var(--text-light);
+margin-bottom: 25px;
+line-height: 1.6;
+}
+
+.confirm-btns {
+display: flex;
+gap: 15px;
+}
+
+.confirm-yes {
+flex: 1;
+padding: 12px;
+background: linear-gradient(135deg, var(--accent-gold), #b8942b);
+border: none;
+border-radius: 10px;
+color: #1a1a2e;
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+}
+
+.confirm-no {
+flex: 1;
+padding: 12px;
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid var(--glass-border);
+border-radius: 10px;
+color: var(--text-light);
+font-size: 14px;
+cursor: pointer;
+}
+</style>
+</head>
+<body>
+<!-- 背景层 -->
+<div class="starfield"></div>
+<div class="stars-layer" id="starsLayer"></div>
+
+<!-- Page 1: 欢迎页 -->
+<div id="page1">
+<div class="magic-circle">
+<div class="circle-ring ring-outer"></div>
+<div class="circle-ring ring-middle"></div>
+<div class="circle-ring ring-inner"></div>
+<div class="magic-orb"></div>
+</div>
+
+<div class="intro-card">
+<div class="intro-title">✧ 星之启示 ✧</div>
+<div class="intro-divider"></div>
+<p class="intro-text">
+塔罗牌是一面映照内心的镜子，<br>
+它不预言命运，而是唤醒你的直觉。<br>
+请带着问题，静心聆听星星的低语。
+</p>
+<button class="start-btn" id="startBtn">开启占卜</button>
+</div>
+
+<div class="footer-credit">✦ Crafted by Blue_official ✦</div>
+</div>
+
+<!-- Page 2: 塔罗主界面 -->
+<div id="page2">
+<div class="top-bar" id="topBar">
+<img class="top-bar-bg" id="topBarBg" style="display:none;">
+<div class="top-icon-btn" id="settingsBtn" title="设置">
+<span id="settingsBtnIcon">⚙️</span>
+</div>
+<div class="top-title">STAR TAROT</div>
+<div class="top-icon-btn" id="themeBtn" title="主题">
+<span id="themeBtnIcon">🎨</span>
+</div>
+</div>
+
+<div class="table-area" id="tableArea">
+<img class="table-bg" id="tableBg" style="display:none;">
+<div class="table-decoration">
+<div class="deco-circle deco-outer"></div>
+<div class="deco-circle deco-inner"></div>
+</div>
+
+<div class="hint-text">向上拖拽卡牌至此处</div>
+<div class="anim-layer" id="animLayer"></div>
+
+<div class="controls-layer">
+<div class="left-btns">
+<div class="small-btn btn-shuffle" id="shuffleBtn">
+<span id="shuffleBtnIcon">🌀</span>
+<small>洗牌</small>
+</div>
+<div class="small-btn btn-mode" id="modeBtn">
+<span id="modeBtnIcon">🃏</span>
+<small>多张</small>
+</div>
+</div>
+<div class="action-btn btn-deck" id="deckBtn">
+<span id="deckBtnIcon">📚</span>
+<small>牌组</small>
+</div>
+</div>
+</div>
+
+<div class="bottom-dock" id="deckDock">
+<img class="bottom-dock-bg" id="bottomDockBg" style="display:none;">
+<div class="deck-counter" id="deckCounter">剩余 72 张</div>
+<div class="cards-wrapper fan-mode" id="cardsWrapper"></div>
+</div>
+</div>
+
+<!-- Modal 弹窗 -->
+<div class="modal-overlay" id="meaningModal">
+<div class="modal-card">
+<div class="modal-icon" id="mIcon">🃏</div>
+<div class="modal-name" id="mName">愚者</div>
+<div class="modal-status upright" id="mStatus">正位</div>
+<div class="modal-divider"></div>
+<div class="modal-meaning" id="mMeaning">含义...</div>
+<button class="modal-close-btn" id="closeModalBtn">收起卡牌</button>
+</div>
+</div>
+
+<!-- 设置面板 -->
+<div class="settings-overlay" id="settingsOverlay">
+<div class="settings-panel">
+<div class="settings-header">
+<div class="settings-title">⚙️ 设置</div>
+<div class="settings-close" id="settingsClose">✕</div>
+</div>
+
+<!-- 占卜设置 -->
+<div class="settings-section">
+<div class="settings-section-title">占卜设置</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>允许逆位</span>
+<small>抽牌时可能出现逆位牌</small>
+</div>
+<div class="toggle-switch active" id="toggleReversed"></div>
+</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>仅大阿卡纳</span>
+<small>只使用22张大秘仪牌</small>
+</div>
+<div class="toggle-switch" id="toggleMajorOnly"></div>
+</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>自动翻牌</span>
+<small>牌放到桌面后自动翻开</small>
+</div>
+<div class="toggle-switch" id="toggleAutoFlip"></div>
+</div>
+</div>
+
+<!-- 显示设置 -->
+<div class="settings-section">
+<div class="settings-section-title">显示设置</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>星空动画</span>
+<small>背景星星闪烁效果</small>
+</div>
+<div class="toggle-switch active" id="toggleStars"></div>
+</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>粒子效果</span>
+<small>浮动粒子动画</small>
+</div>
+<div class="toggle-switch active" id="toggleParticles"></div>
+</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>洗牌动画</span>
+<small>洗牌时播放动画</small>
+</div>
+<div class="toggle-switch active" id="toggleShuffleAnim"></div>
+</div>
+</div>
+
+<!-- 牌组设置 -->
+<div class="settings-section">
+<div class="settings-section-title">牌组设置</div>
+
+<div class="setting-item">
+<div class="setting-label">
+<span>默认显示模式</span>
+</div>
+<div class="option-group">
+<div class="option-btn active" data-mode="fan">扇形</div>
+<div class="option-btn" data-mode="stack">堆叠</div>
+</div>
+</div>
+</div>
+
+<!-- 关于 -->
+<div class="settings-section">
+<div class="settings-section-title">关于</div>
+<div class="about-section">
+<div class="about-logo">🔮</div>
+<div class="about-name">星之塔罗</div>
+<div class="about-version">Version 1.0.0</div>
+<div class="about-desc">
+一款优雅的在线塔罗牌占卜应用。<br>
+让星星指引你探索内心的智慧。
+</div>
+<div class="about-credit">✦ Crafted with ♥ by Blue_official ✦</div>
+</div>
+</div>
+
+<!-- 重置 -->
+<button class="reset-btn" id="resetBtn">🔄 恢复默认设置</button>
+</div>
+</div>
+
+<!-- 主题面板 -->
+<div class="theme-overlay" id="themeOverlay">
+<div class="theme-panel">
+<div class="theme-header">
+<div class="theme-title">🎨 主题设置</div>
+<div class="theme-close" id="themeClose">✕</div>
+</div>
+
+<div class="theme-tip">
+建议使用图片URL，本地上传的图片较大会影响加载速度哦！图片不会拉伸，只会裁剪适配。
+</div>
+
+<!-- 图片设置区域 -->
+<div class="theme-section">
+<div class="theme-section-title">界面元素</div>
+
+<!-- 顶栏 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewTopBar">📱</div>
+<span>顶栏背景</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlTopBar" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="topBar">
+</label>
+<button class="theme-btn-clear" data-target="topBar">清除</button>
+</div>
+</div>
+
+<!-- 底栏 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewBottomDock">📱</div>
+<span>底栏背景</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlBottomDock" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="bottomDock">
+</label>
+<button class="theme-btn-clear" data-target="bottomDock">清除</button>
+</div>
+</div>
+
+<!-- 牌桌背景 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewTable">🎴</div>
+<span>牌桌背景</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlTable" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="table">
+</label>
+<button class="theme-btn-clear" data-target="table">清除</button>
+</div>
+</div>
+
+<!-- 牌组背面 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewCardBack">🃏</div>
+<span>牌组背面</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlCardBack" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="cardBack">
+</label>
+<button class="theme-btn-clear" data-target="cardBack">清除</button>
+</div>
+</div>
+</div>
+
+<!-- 按钮图标设置 -->
+<div class="theme-section">
+<div class="theme-section-title">按钮图标</div>
+
+<!-- 设置按钮 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewSettingsBtn">⚙️</div>
+<span>设置按钮</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlSettingsBtn" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="settingsBtn">
+</label>
+<button class="theme-btn-clear" data-target="settingsBtn">清除</button>
+</div>
+</div>
+
+<!-- 主题按钮 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewThemeBtn">🎨</div>
+<span>主题按钮</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlThemeBtn" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="themeBtn">
+</label>
+<button class="theme-btn-clear" data-target="themeBtn">清除</button>
+</div>
+</div>
+
+<!-- 洗牌按钮 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewShuffleBtn">🌀</div>
+<span>洗牌按钮</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlShuffleBtn" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="shuffleBtn">
+</label>
+<button class="theme-btn-clear" data-target="shuffleBtn">清除</button>
+</div>
+</div>
+
+<!-- 多张/扇形按钮 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewModeBtn">🃏</div>
+<span>多张/扇形</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlModeBtn" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="modeBtn">
+</label>
+<button class="theme-btn-clear" data-target="modeBtn">清除</button>
+</div>
+</div>
+
+<!-- 牌组按钮 -->
+<div class="theme-item">
+<div class="theme-item-label">
+<div class="preview-icon" id="previewDeckBtn">📚</div>
+<span>牌组按钮</span>
+</div>
+<div class="theme-item-actions">
+<input type="text" class="theme-input-url" id="urlDeckBtn" placeholder="图片URL">
+<label class="theme-btn-upload">
+上传
+<input type="file" class="hidden-file-input" accept="image/*" data-target="deckBtn">
+</label>
+<button class="theme-btn-clear" data-target="deckBtn">清除</button>
+</div>
+</div>
+</div>
+
+<!-- 保存设置按钮 -->
+<button class="theme-save-btn" id="themeSaveBtn">💾 保存设置</button>
+
+<!-- 导入导出 -->
+<div class="theme-io-section">
+<div class="theme-io-title">📦 导入 / 导出</div>
+<div class="theme-io-btns">
+<button class="theme-io-btn" id="exportThemeBtn">📤 导出主题</button>
+<button class="theme-io-btn import-btn" id="importThemeBtnTrigger">📥 导入主题</button>
+<input type="file" class="hidden-file-input" id="importThemeInput" accept=".txt">
+</div>
+</div>
+
+<!-- 预设管理 -->
+<div class="preset-section">
+<div class="preset-title">⭐ 预设管理</div>
+<div class="preset-save-row">
+<input type="text" class="preset-name-input" id="presetNameInput" placeholder="输入预设名称...">
+<button class="preset-save-btn" id="savePresetBtn">保存预设</button>
+</div>
+<div class="preset-list" id="presetList">
+<div class="preset-empty">暂无预设，保存当前主题为预设吧！</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 牌组设置面板 -->
+<div class="deck-settings-overlay" id="deckSettingsOverlay">
+<div class="deck-settings-panel">
+<div class="deck-settings-header">
+<div class="deck-settings-title">📚 牌组设置</div>
+<div class="deck-settings-close" id="deckSettingsClose">✕</div>
+</div>
+
+<!-- 牌组选择 -->
+<div class="deck-section">
+<div class="deck-section-title">选择牌组</div>
+<div class="deck-select-row">
+<select class="deck-select" id="deckSelect">
+<option value="default">默认塔罗牌组</option>
+</select>
+<button class="deck-apply-btn" id="deckApplyBtn">应用牌组</button>
+</div>
+</div>
+
+<!-- 牌组操作 -->
+<div class="deck-section">
+<div class="deck-section-title">牌组操作</div>
+<div class="deck-action-btns">
+<button class="deck-action-btn upload-btn" id="uploadDeckBtn">📤 上传牌组</button>
+</div>
+</div>
+
+<!-- 已保存牌组 -->
+<div class="deck-section">
+<div class="deck-section-title">已保存牌组</div>
+<div class="saved-decks-list" id="savedDecksList">
+<div class="no-decks-msg">暂无自定义牌组，点击上方按钮创建一个吧！</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 上传牌组面板 -->
+<div class="upload-deck-overlay" id="uploadDeckOverlay">
+<div class="upload-deck-panel">
+<div class="upload-deck-header">
+<div class="upload-deck-title">📤 上传牌组</div>
+</div>
+
+<!-- 牌组基本信息 -->
+<div class="deck-basic-info">
+<div class="deck-section-title">基本信息</div>
+<div class="deck-info-row">
+<div class="deck-info-item">
+<label class="deck-info-label">牌组名称</label>
+<input type="text" class="deck-info-input" id="deckNameInput" placeholder="输入牌组名称...">
+</div>
+<div class="deck-info-item">
+<label class="deck-info-label">统一牌背图片URL</label>
+<input type="text" class="deck-info-input" id="deckBackUrlInput" placeholder="请上传图片URL">
+</div>
+</div>
+</div>
+
+<!-- 牌面列表 -->
+<div class="cards-list-section">
+<div class="cards-list-header">
+<div class="cards-list-title">牌面设置</div>
+<button class="add-card-btn" id="addCardBtn">+ 添加牌面</button>
+</div>
+<div class="cards-list-container" id="cardsListContainer">
+<!-- 牌面项会动态生成 -->
+</div>
+</div>
+
+<!-- 批量操作 -->
+<div class="batch-operations">
+<button class="batch-btn batch-export-btn" id="batchExportBtn">📤 批量导出</button>
+<button class="batch-btn batch-import-btn" id="batchImportBtn">📥 批量导入</button>
+<input type="file" class="hidden-file-input" id="batchImportInput" accept=".txt">
+</div>
+
+<!-- 底部按钮 -->
+<div class="upload-deck-footer">
+<button class="deck-save-btn" id="deckSaveBtn">💾 保存牌组</button>
+<button class="deck-exit-btn" id="deckExitBtn">退出</button>
+</div>
+</div>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="confirm-modal" id="confirmModal">
+<div class="confirm-box">
+<div class="confirm-icon">⚠️</div>
+<div class="confirm-text" id="confirmText">请确认你已经上传并保存好牌组了哦</div>
+<div class="confirm-btns">
+<button class="confirm-yes" id="confirmYes">确定</button>
+<button class="confirm-no" id="confirmNo">取消</button>
+</div>
+</div>
+</div>
+
+<script>
+// 设置数据
+var settings = {
+allowReversed: true,
+majorOnly: false,
+autoFlip: false,
+starsAnimation: true,
+particlesAnimation: true,
+shuffleAnimation: true,
+defaultMode: 'fan'
+};
+
+// 主题数据
+var themeData = {
+topBar: '',
+bottomDock: '',
+table: '',
+cardBack: '',
+settingsBtn: '',
+themeBtn: '',
+shuffleBtn: '',
+modeBtn: '',
+deckBtn: ''
+};
+
+// 预设数据
+var presets = [];
+var activePresetIndex = -1;
+
+// 自定义牌组数据
+var customDecks = [];
+var currentDeckId = 'default';
+var editingDeckIndex = -1;
+var editingCards = [];
+
+// 尝试从本地存储加载设置
+try {
+var saved = localStorage.getItem('tarotSettings');
+if (saved) {
+settings = JSON.parse(saved);
+}
+var savedTheme = localStorage.getItem('tarotTheme');
+if (savedTheme) {
+themeData = JSON.parse(savedTheme);
+}
+var savedPresets = localStorage.getItem('tarotPresets');
+if (savedPresets) {
+presets = JSON.parse(savedPresets);
+}
+var savedDecks = localStorage.getItem('tarotCustomDecks');
+if (savedDecks) {
+customDecks = JSON.parse(savedDecks);
+}
+var savedCurrentDeck = localStorage.getItem('tarotCurrentDeck');
+if (savedCurrentDeck) {
+currentDeckId = savedCurrentDeck;
+}
+} catch(e) {}
+
+// 保存设置到本地存储
+function saveSettings() {
+try {
+localStorage.setItem('tarotSettings', JSON.stringify(settings));
+} catch(e) {}
+}
+
+// 保存主题到本地存储
+function saveThemeData() {
+try {
+localStorage.setItem('tarotTheme', JSON.stringify(themeData));
+} catch(e) {}
+}
+
+// 保存预设到本地存储
+function savePresets() {
+try {
+localStorage.setItem('tarotPresets', JSON.stringify(presets));
+} catch(e) {}
+}
+
+// 保存自定义牌组到本地存储
+function saveCustomDecks() {
+try {
+localStorage.setItem('tarotCustomDecks', JSON.stringify(customDecks));
+localStorage.setItem('tarotCurrentDeck', currentDeckId);
+} catch(e) {}
+}
+
+// 默认数据源
+var defaultDeck = [];
+var tarotDeck = [];
+var fullDeck = [];
+var cardNames = [
+"愚者", "魔术师", "女祭司", "女皇", "皇帝", "教皇",
+"恋人", "战车", "力量", "隐士", "命运之轮", "正义",
+"倒吊人", "死神", "节制", "恶魔", "高塔", "星星",
+"月亮", "太阳", "审判", "世界"
+];
+var cardIcons = [
+"🃏", "🎩", "🌙", "👑", "🏰", "📿",
+"💕", "🏇", "🦁", "🏮", "🎡", "⚖️",
+"🙃", "💀", "⚗️", "😈", "🗼", "⭐",
+"🌕", "☀️", "📯", "🌍"
+];
+
+for (var i = 0; i < 72; i++) {
+var name = i < 22 ? cardNames[i] : "小秘仪 " + (i - 21);
+var icon = i < 22 ? cardIcons[i] : "🎴";
+var cardData = {
+id: i,
+name: name,
+icon: icon,
+isMajor: i < 22,
+frontUrl: '',
+descUp: "正位含义：顺利与希望的象征。代表着新的开始、无限可能与纯真的心灵。相信直觉，勇敢迈出第一步。",
+descRev: "逆位含义：需要谨慎与反思。可能暗示冲动、犹豫不决或时机未到。静心等待，重新审视当前处境。"
+};
+defaultDeck.push(cardData);
+fullDeck.push(JSON.parse(JSON.stringify(cardData)));
+}
+
+// 根据设置过滤牌组
+function filterDeck() {
+if (settings.majorOnly) {
+tarotDeck = fullDeck.filter(function(card) {
+return card.isMajor;
+});
+} else {
+tarotDeck = fullDeck.slice();
+}
+}
+filterDeck();
+
+// 加载指定牌组
+function loadDeck(deckId) {
+if (deckId === 'default') {
+fullDeck = [];
+for (var i = 0; i < defaultDeck.length; i++) {
+fullDeck.push(JSON.parse(JSON.stringify(defaultDeck[i])));
+}
+// 重置主题中的牌背
+themeData.cardBack = '';
+} else {
+var deck = null;
+for (var i = 0; i < customDecks.length; i++) {
+if (customDecks[i].id === deckId) {
+deck = customDecks[i];
+break;
+}
+}
+if (deck && deck.cards) {
+fullDeck = [];
+for (var j = 0; j < deck.cards.length; j++) {
+var card = deck.cards[j];
+fullDeck.push({
+id: j,
+name: card.name || '未命名',
+icon: '🎴',
+isMajor: card.isMajor !== false,
+frontUrl: card.frontUrl || '',
+descUp: card.descUp || '正位含义：待填写',
+descRev: card.descRev || '逆位含义：待填写'
+});
+}
+// 应用牌组的统一牌背
+if (deck.backUrl) {
+themeData.cardBack = deck.backUrl;
+}
+}
+}
+currentDeckId = deckId;
+saveCustomDecks();
+filterDeck();
+}
+
+// 模式状态
+var displayMode = settings.defaultMode;
+var tableCardZIndex = 100;
+
+// 星空背景初始化
+function createStarfield() {
+var layer = document.getElementById('starsLayer');
+layer.innerHTML = '';
+
+if (settings.starsAnimation) {
+for (var i = 0; i < 80; i++) {
+var star = document.createElement('div');
+star.className = 'star';
+star.style.left = Math.random() * 100 + '%';
+star.style.top = Math.random() * 100 + '%';
+var size = Math.random() * 2.5 + 0.5;
+star.style.width = size + 'px';
+star.style.height = size + 'px';
+star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+layer.appendChild(star);
+}
+
+for (var i = 0; i < 3; i++) {
+var shootingStar = document.createElement('div');
+shootingStar.className = 'shooting-star';
+shootingStar.style.left = Math.random() * 50 + '%';
+shootingStar.style.top = Math.random() * 30 + '%';
+shootingStar.style.animationDelay = (Math.random() * 5 + i * 3) + 's';
+layer.appendChild(shootingStar);
+}
+}
+
+if (settings.particlesAnimation) {
+for (var i = 0; i < 15; i++) {
+var particle = document.createElement('div');
+particle.className = 'particle';
+particle.style.left = Math.random() * 100 + '%';
+var size = Math.random() * 4 + 2;
+particle.style.width = size + 'px';
+particle.style.height = size + 'px';
+particle.style.background = Math.random() > 0.5
+? 'rgba(212, 175, 55, 0.4)'
+: 'rgba(157, 78, 221, 0.4)';
+particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+particle.style.animationDelay = (Math.random() * 10) + 's';
+layer.appendChild(particle);
+}
+}
+}
+createStarfield();
+
+// DOM 元素引用
+var deckDock = document.getElementById('deckDock');
+var cardsWrapper = document.getElementById('cardsWrapper');
+var tableArea = document.getElementById('tableArea');
+var animLayer = document.getElementById('animLayer');
+var deckCounter = document.getElementById('deckCounter');
+var page1 = document.getElementById('page1');
+var page2 = document.getElementById('page2');
+var modeBtn = document.getElementById('modeBtn');
+var settingsOverlay = document.getElementById('settingsOverlay');
+var themeOverlay = document.getElementById('themeOverlay');
+var deckSettingsOverlay = document.getElementById('deckSettingsOverlay');
+var uploadDeckOverlay = document.getElementById('uploadDeckOverlay');
+var confirmModal = document.getElementById('confirmModal');
+
+// 页面切换
+function goToPage2() {
+page1.classList.add('fade-out');
+setTimeout(function() {
+page1.style.display = 'none';
+page2.style.display = 'flex';
+// 加载当前牌组
+loadDeck(currentDeckId);
+initDeck();
+applyTheme();
+}, 800);
+}
+
+document.getElementById('startBtn').addEventListener('click', goToPage2);
+
+// 更新计数器
+function updateCounter() {
+var remaining = cardsWrapper.querySelectorAll('.card-container').length;
+deckCounter.textContent = '剩余 ' + remaining + ' 张';
+}
+
+// 初始化牌组
+function initDeck() {
+var existingCards = cardsWrapper.querySelectorAll('.card-container');
+for (var i = 0; i < existingCards.length; i++) {
+existingCards[i].remove();
+}
+
+filterDeck();
+
+for (var i = 0; i < tarotDeck.length; i++) {
+var card = createCardDOM(tarotDeck[i], false);
+cardsWrapper.appendChild(card);
+}
+
+applyDisplayMode();
+updateCounter();
+}
+
+// 应用显示模式
+function applyDisplayMode() {
+var cards = cardsWrapper.querySelectorAll('.card-container');
+
+if (displayMode === 'fan') {
+cardsWrapper.className = 'cards-wrapper fan-mode';
+for (var i = 0; i < cards.length; i++) {
+cards[i].style.zIndex = i;
+cards[i].style.transform = '';
+}
+} else {
+cardsWrapper.className = 'cards-wrapper stack-mode';
+for (var i = 0; i < cards.length; i++) {
+var offsetX = (Math.random() - 0.5) * 4;
+var offsetY = (Math.random() - 0.5) * 2;
+var rotate = (Math.random() - 0.5) * 3;
+cards[i].style.zIndex = i;
+cards[i].style.transform = 'translateX(calc(-50% + ' + offsetX + 'px)) translateY(' + offsetY + 'px) rotate(' + rotate + 'deg)';
+}
+}
+}
+
+// 切换模式
+modeBtn.addEventListener('click', function() {
+if (displayMode === 'fan') {
+displayMode = 'stack';
+if (!themeData.modeBtn) {
+document.getElementById('modeBtnIcon').textContent = '📄';
+}
+modeBtn.querySelector('small').textContent = '扇形';
+} else {
+displayMode = 'fan';
+if (!themeData.modeBtn) {
+document.getElementById('modeBtnIcon').textContent = '🃏';
+}
+modeBtn.querySelector('small').textContent = '多张';
+}
+applyDisplayMode();
+});
+
+// 创建卡牌DOM
+function createCardDOM(data, isOnTable) {
+var container = document.createElement('div');
+container.className = 'card-container';
+container.dataset.id = data.id;
+
+var inner = document.createElement('div');
+inner.className = 'card-inner';
+
+var back = document.createElement('div');
+back.className = 'card-back';
+
+// 添加自定义牌背
+if (themeData.cardBack) {
+var backImg = document.createElement('img');
+backImg.className = 'card-back-img';
+backImg.src = themeData.cardBack;
+back.appendChild(backImg);
+back.classList.add('has-custom-img');
+}
+
+var front = document.createElement('div');
+front.className = 'card-front';
+
+// 添加自定义牌面
+if (data.frontUrl) {
+var frontImg = document.createElement('img');
+frontImg.className = 'card-front-img';
+frontImg.src = data.frontUrl;
+front.appendChild(frontImg);
+}
+
+var content = document.createElement('div');
+content.className = 'card-content-wrap';
+if (!data.frontUrl) {
+content.innerHTML = '<div class="card-icon">' + data.icon + '</div><div class="card-name">' + data.name + '</div>';
+} else {
+content.style.display = 'none';
+}
+
+front.appendChild(content);
+inner.appendChild(back);
+inner.appendChild(front);
+container.appendChild(inner);
+
+if (isOnTable) {
+setupTableCardEvents(container);
+} else {
+setupDeckCardDrag(container);
+}
+
+return container;
+}
+
+// 底栏牌的拖拽
+function setupDeckCardDrag(el) {
+el.addEventListener('mousedown', deckDragStart);
+el.addEventListener('touchstart', deckDragStart, { passive: false });
+}
+
+// 桌面牌的事件
+function setupTableCardEvents(el) {
+var startX, startY, startTime;
+var hasMoved = false;
+var isDragging = false;
+var dragOffsetX, dragOffsetY;
+
+function onStart(e) {
+e.preventDefault();
+var touch = e.touches ? e.touches[0] : e;
+startX = touch.clientX;
+startY = touch.clientY;
+startTime = Date.now();
+hasMoved = false;
+isDragging = true;
+
+var rect = el.getBoundingClientRect();
+dragOffsetX = touch.clientX - rect.left;
+dragOffsetY = touch.clientY - rect.top;
+
+tableCardZIndex++;
+el.style.zIndex = tableCardZIndex;
+
+document.addEventListener('mousemove', onMove);
+document.addEventListener('mouseup', onEnd);
+document.addEventListener('touchmove', onMove, { passive: false });
+document.addEventListener('touchend', onEnd);
+}
+
+function onMove(e) {
+if (!isDragging) return;
+e.preventDefault();
+
+var touch = e.touches ? e.touches[0] : e;
+var dx = touch.clientX - startX;
+var dy = touch.clientY - startY;
+
+if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+hasMoved = true;
+}
+
+var tableRect = tableArea.getBoundingClientRect();
+var newLeft = touch.clientX - tableRect.left - dragOffsetX;
+var newTop = touch.clientY - tableRect.top - dragOffsetY;
+el.style.left = newLeft + 'px';
+el.style.top = newTop + 'px';
+}
+
+function onEnd(e) {
+if (!isDragging) return;
+isDragging = false;
+
+document.removeEventListener('mousemove', onMove);
+document.removeEventListener('mouseup', onEnd);
+document.removeEventListener('touchmove', onMove);
+document.removeEventListener('touchend', onEnd);
+
+var elapsed = Date.now() - startTime;
+
+if (!hasMoved && elapsed < 300) {
+handleTableCardClick(el);
+}
+}
+
+el.addEventListener('mousedown', onStart);
+el.addEventListener('touchstart', onStart, { passive: false });
+}
+
+// 洗牌动画
+document.getElementById('shuffleBtn').addEventListener('click', playShuffleAnim);
+
+function playShuffleAnim() {
+var onTableCards = document.querySelectorAll('.on-table');
+for (var i = 0; i < onTableCards.length; i++) {
+onTableCards[i].remove();
+}
+
+var existingCards = cardsWrapper.querySelectorAll('.card-container');
+for (var i = 0; i < existingCards.length; i++) {
+existingCards[i].remove();
+}
+
+animLayer.innerHTML = '';
+tableCardZIndex = 100;
+
+if (!settings.shuffleAnimation) {
+tarotDeck.sort(function() { return Math.random() - 0.5; });
+initDeck();
+return;
+}
+
+var tempCards = [];
+var cardCount = 25;
+
+for (var i = 0; i < cardCount; i++) {
+var c = document.createElement('div');
+c.className = 'shuffle-card';
+c.style.left = '50%';
+c.style.top = '45%';
+c.style.marginLeft = '-35px';
+c.style.marginTop = '-55px';
+c.style.zIndex = i;
+animLayer.appendChild(c);
+tempCards.push(c);
+}
+
+setTimeout(function() {
+for (var i = 0; i < tempCards.length; i++) {
+var angle = (i / cardCount) * 360;
+var radius = 80 + Math.random() * 40;
+var tx = Math.cos(angle * Math.PI / 180) * radius;
+var ty = Math.sin(angle * Math.PI / 180) * radius;
+var rotation = (Math.random() - 0.5) * 180;
+tempCards[i].style.transform = 'translate(' + tx + 'px, ' + ty + 'px) rotate(' + rotation + 'deg)';
+}
+}, 100);
+setTimeout(function() {
+for (var i = 0; i < tempCards.length; i++) {
+tempCards[i].style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+var rotation = 360 + Math.random() * 180;
+tempCards[i].style.transform = 'rotate(' + rotation + 'deg) scale(0.9)';
+}
+}, 800);
+
+setTimeout(function() {
+for (var i = 0; i < tempCards.length; i++) {
+tempCards[i].style.transform = 'rotate(0deg)';
+tempCards[i].style.left = (30 + (i % 5) * 10) + '%';
+tempCards[i].style.top = (30 + Math.floor(i / 5) * 15) + '%';
+}
+}, 1400);
+
+setTimeout(function() {
+for (var i = 0; i < tempCards.length; i++) {
+tempCards[i].style.top = '85%';
+tempCards[i].style.left = '50%';
+tempCards[i].style.opacity = '0';
+tempCards[i].style.transform = 'scale(0.5)';
+}
+}, 2200);
+
+setTimeout(function() {
+animLayer.innerHTML = '';
+tarotDeck.sort(function() { return Math.random() - 0.5; });
+initDeck();
+deckDock.scrollLeft = 0;
+}, 2800);
+}
+
+// 底栏牌拖拽逻辑
+var deckDragItem = null;
+var cloneItem = null;
+var isDeckDragging = false;
+var deckStartX, deckStartY;
+var lastX;
+
+function deckDragStart(e) {
+e.preventDefault();
+deckDragItem = e.currentTarget;
+
+var cx = e.clientX || e.touches[0].clientX;
+var cy = e.clientY || e.touches[0].clientY;
+
+deckStartX = cx;
+deckStartY = cy;
+lastX = cx;
+isDeckDragging = true;
+
+if (displayMode === 'stack') {
+var cards = cardsWrapper.querySelectorAll('.card-container');
+var maxZ = cards.length;
+deckDragItem.style.zIndex = maxZ + 1;
+}
+
+document.addEventListener('mousemove', deckDragMove);
+document.addEventListener('mouseup', deckDragEnd);
+document.addEventListener('touchmove', deckDragMove, { passive: false });
+document.addEventListener('touchend', deckDragEnd);
+}
+
+function deckDragMove(e) {
+if (!isDeckDragging) return;
+e.preventDefault();
+
+var cx = e.clientX || e.touches[0].clientX;
+var cy = e.clientY || e.touches[0].clientY;
+var deltaY = cy - deckStartY;
+var movementX = cx - lastX;
+lastX = cx;
+
+if (cloneItem) {
+cloneItem.style.left = (cx - 35) + 'px';
+cloneItem.style.top = (cy - 55) + 'px';
+return;
+}
+
+if (deltaY < -25) {
+cloneItem = deckDragItem.cloneNode(true);
+cloneItem.classList.add('dragging');
+document.body.appendChild(cloneItem);
+cloneItem.style.left = (cx - 35) + 'px';
+cloneItem.style.top = (cy - 55) + 'px';
+} else if (displayMode === 'fan') {
+deckDock.scrollLeft -= movementX;
+}
+}
+
+function deckDragEnd(e) {
+if (!isDeckDragging) return;
+isDeckDragging = false;
+
+document.removeEventListener('mousemove', deckDragMove);
+document.removeEventListener('mouseup', deckDragEnd);
+document.removeEventListener('touchmove', deckDragMove);
+document.removeEventListener('touchend', deckDragEnd);
+
+if (cloneItem) {
+var tableRect = tableArea.getBoundingClientRect();
+var cardRect = cloneItem.getBoundingClientRect();
+
+if (cardRect.top < tableRect.bottom && cardRect.top > tableRect.top) {
+placeOnTable(
+deckDragItem.dataset.id,
+cardRect.left - tableRect.left,
+cardRect.top - tableRect.top
+);
+deckDragItem.remove();
+applyDisplayMode();
+updateCounter();
+}
+cloneItem.remove();
+cloneItem = null;
+}
+deckDragItem = null;
+}
+
+function placeOnTable(id, x, y) {
+var data = null;
+for (var i = 0; i < fullDeck.length; i++) {
+if (fullDeck[i].id == id) {
+data = fullDeck[i];
+break;
+}
+}
+if (!data) {
+for (var i = 0; i < tarotDeck.length; i++) {
+if (tarotDeck[i].id == id) {
+data = tarotDeck[i];
+break;
+}
+}
+}
+if (!data) return;
+
+var newCard = createCardDOM(data, true);
+
+newCard.classList.add('on-table');
+newCard.style.left = x + 'px';
+newCard.style.top = y + 'px';
+
+tableCardZIndex++;
+newCard.style.zIndex = tableCardZIndex;
+
+var isReversed = settings.allowReversed ? (Math.random() > 0.5) : false;
+newCard.dataset.reversed = isReversed;
+if (isReversed) newCard.classList.add('reversed');
+
+tableArea.appendChild(newCard);
+
+// 自动翻牌
+if (settings.autoFlip) {
+setTimeout(function() {
+newCard.classList.add('flipped');
+}, 300);
+}
+}
+
+function handleTableCardClick(card) {
+if (!card.classList.contains('flipped')) {
+card.classList.add('flipped');
+} else {
+showMeaning(card);
+}
+}
+
+// Modal 弹窗
+function showMeaning(card) {
+var id = card.dataset.id;
+var isRev = card.dataset.reversed === 'true';
+var data = null;
+for (var i = 0; i < fullDeck.length; i++) {
+if (fullDeck[i].id == id) {
+data = fullDeck[i];
+break;
+}
+}
+if (!data) {
+for (var i = 0; i < tarotDeck.length; i++) {
+if (tarotDeck[i].id == id) {
+data = tarotDeck[i];
+break;
+}
+}
+}
+if (!data) return;
+
+document.getElementById('mIcon').innerText = data.icon;
+document.getElementById('mName').innerText = data.name;
+
+var statusEl = document.getElementById('mStatus');
+var meanEl = document.getElementById('mMeaning');
+
+if (isRev) {
+statusEl.innerText = "逆位";
+statusEl.className = 'modal-status reversed';
+meanEl.innerText = data.descRev;
+} else {
+statusEl.innerText = "正位";
+statusEl.className = 'modal-status upright';
+meanEl.innerText = data.descUp;
+}
+
+document.getElementById('meaningModal').style.display = 'flex';
+}
+
+function closeModal() {
+document.getElementById('meaningModal').style.display = 'none';
+}
+
+document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+
+document.getElementById('meaningModal').addEventListener('click', function(e) {
+if (e.target === this) {
+closeModal();
+}
+});
+
+// ========== 设置功能 ==========
+
+// 打开设置
+document.getElementById('settingsBtn').addEventListener('click', function() {
+settingsOverlay.classList.add('show');
+updateSettingsUI();
+});
+
+// 关闭设置
+document.getElementById('settingsClose').addEventListener('click', function() {
+settingsOverlay.classList.remove('show');
+});
+
+settingsOverlay.addEventListener('click', function(e) {
+if (e.target === this) {
+settingsOverlay.classList.remove('show');
+}
+});
+
+// 更新设置界面显示
+function updateSettingsUI() {
+document.getElementById('toggleReversed').classList.toggle('active', settings.allowReversed);
+document.getElementById('toggleMajorOnly').classList.toggle('active', settings.majorOnly);
+document.getElementById('toggleAutoFlip').classList.toggle('active', settings.autoFlip);
+document.getElementById('toggleStars').classList.toggle('active', settings.starsAnimation);
+document.getElementById('toggleParticles').classList.toggle('active', settings.particlesAnimation);
+document.getElementById('toggleShuffleAnim').classList.toggle('active', settings.shuffleAnimation);
+
+var optionBtns = document.querySelectorAll('.option-btn');
+for (var i = 0; i < optionBtns.length; i++) {
+optionBtns[i].classList.toggle('active', optionBtns[i].dataset.mode === settings.defaultMode);
+}
+}
+
+// 开关点击
+document.getElementById('toggleReversed').addEventListener('click', function() {
+settings.allowReversed = !settings.allowReversed;
+this.classList.toggle('active', settings.allowReversed);
+saveSettings();
+});
+
+document.getElementById('toggleMajorOnly').addEventListener('click', function() {
+settings.majorOnly = !settings.majorOnly;
+this.classList.toggle('active', settings.majorOnly);
+saveSettings();
+initDeck();
+});
+
+document.getElementById('toggleAutoFlip').addEventListener('click', function() {
+settings.autoFlip = !settings.autoFlip;
+this.classList.toggle('active', settings.autoFlip);
+saveSettings();
+});
+
+document.getElementById('toggleStars').addEventListener('click', function() {
+settings.starsAnimation = !settings.starsAnimation;
+this.classList.toggle('active', settings.starsAnimation);
+saveSettings();
+createStarfield();
+});
+
+document.getElementById('toggleParticles').addEventListener('click', function() {
+settings.particlesAnimation = !settings.particlesAnimation;
+this.classList.toggle('active', settings.particlesAnimation);
+saveSettings();
+createStarfield();
+});
+
+document.getElementById('toggleShuffleAnim').addEventListener('click', function() {
+settings.shuffleAnimation = !settings.shuffleAnimation;
+this.classList.toggle('active', settings.shuffleAnimation);
+saveSettings();
+});
+
+// 模式选择
+var optionBtns = document.querySelectorAll('.option-btn');
+for (var i = 0; i < optionBtns.length; i++) {
+optionBtns[i].addEventListener('click', function() {
+settings.defaultMode = this.dataset.mode;
+for (var j = 0; j < optionBtns.length; j++) {
+optionBtns[j].classList.remove('active');
+}
+this.classList.add('active');
+saveSettings();
+});
+}
+
+// 重置设置
+document.getElementById('resetBtn').addEventListener('click', function() {
+if (confirm('确定要恢复默认设置吗？')) {
+settings = {
+allowReversed: true,
+majorOnly: false,
+autoFlip: false,
+starsAnimation: true,
+particlesAnimation: true,
+shuffleAnimation: true,
+defaultMode: 'fan'
+};
+saveSettings();
+updateSettingsUI();
+createStarfield();
+displayMode = 'fan';
+if (!themeData.modeBtn) {
+document.getElementById('modeBtnIcon').textContent = '🃏';
+}
+modeBtn.querySelector('small').textContent = '多张';
+initDeck();
+}
+});
+
+// ========== 主题功能 ==========
+
+// 打开主题
+document.getElementById('themeBtn').addEventListener('click', function() {
+themeOverlay.classList.add('show');
+updateThemeUI();
+updatePresetList();
+});
+
+// 关闭主题
+document.getElementById('themeClose').addEventListener('click', function() {
+themeOverlay.classList.remove('show');
+});
+
+themeOverlay.addEventListener('click', function(e) {
+if (e.target === this) {
+themeOverlay.classList.remove('show');
+}
+});
+
+// 更新主题界面显示
+function updateThemeUI() {
+document.getElementById('urlTopBar').value = themeData.topBar || '';
+document.getElementById('urlBottomDock').value = themeData.bottomDock || '';
+document.getElementById('urlTable').value = themeData.table || '';
+document.getElementById('urlCardBack').value = themeData.cardBack || '';
+document.getElementById('urlSettingsBtn').value = themeData.settingsBtn || '';
+document.getElementById('urlThemeBtn').value = themeData.themeBtn || '';
+document.getElementById('urlShuffleBtn').value = themeData.shuffleBtn || '';
+document.getElementById('urlModeBtn').value = themeData.modeBtn || '';
+document.getElementById('urlDeckBtn').value = themeData.deckBtn || '';
+
+// 更新预览图标
+updatePreviewIcon('previewTopBar', themeData.topBar, '📱');
+updatePreviewIcon('previewBottomDock', themeData.bottomDock, '📱');
+updatePreviewIcon('previewTable', themeData.table, '🎴');
+updatePreviewIcon('previewCardBack', themeData.cardBack, '🃏');
+updatePreviewIcon('previewSettingsBtn', themeData.settingsBtn, '⚙️');
+updatePreviewIcon('previewThemeBtn', themeData.themeBtn, '🎨');
+updatePreviewIcon('previewShuffleBtn', themeData.shuffleBtn, '🌀');
+updatePreviewIcon('previewModeBtn', themeData.modeBtn, '🃏');
+updatePreviewIcon('previewDeckBtn', themeData.deckBtn, '📚');
+}
+
+function updatePreviewIcon(id, url, defaultIcon) {
+var el = document.getElementById(id);
+if (url) {
+el.innerHTML = '<img src="' + url + '" alt="">';
+} else {
+el.innerHTML = defaultIcon;
+}
+}
+
+// 应用主题到界面
+function applyTheme() {
+// 顶栏背景
+var topBarBg = document.getElementById('topBarBg');
+if (themeData.topBar) {
+topBarBg.src = themeData.topBar;
+topBarBg.style.display = 'block';
+} else {
+topBarBg.style.display = 'none';
+}
+
+// 底栏背景
+var bottomDockBg = document.getElementById('bottomDockBg');
+if (themeData.bottomDock) {
+bottomDockBg.src = themeData.bottomDock;
+bottomDockBg.style.display = 'block';
+} else {
+bottomDockBg.style.display = 'none';
+}
+
+// 牌桌背景
+var tableBg = document.getElementById('tableBg');
+if (themeData.table) {
+tableBg.src = themeData.table;
+tableBg.style.display = 'block';
+} else {
+tableBg.style.display = 'none';
+}
+
+// 设置按钮
+var settingsBtnIcon = document.getElementById('settingsBtnIcon');
+if (themeData.settingsBtn) {
+settingsBtnIcon.innerHTML = '<img src="' + themeData.settingsBtn + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">';
+} else {
+settingsBtnIcon.innerHTML = '⚙️';
+}
+
+// 主题按钮
+var themeBtnIcon = document.getElementById('themeBtnIcon');
+if (themeData.themeBtn) {
+themeBtnIcon.innerHTML = '<img src="' + themeData.themeBtn + '" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">';
+} else {
+themeBtnIcon.innerHTML = '🎨';
+}
+
+// 洗牌按钮
+var shuffleBtnIcon = document.getElementById('shuffleBtnIcon');
+if (themeData.shuffleBtn) {
+shuffleBtnIcon.innerHTML = '<img class="btn-custom-img" src="' + themeData.shuffleBtn + '">';
+} else {
+shuffleBtnIcon.innerHTML = '🌀';
+}
+
+// 多张/扇形按钮
+var modeBtnIcon = document.getElementById('modeBtnIcon');
+if (themeData.modeBtn) {
+modeBtnIcon.innerHTML = '<img class="btn-custom-img" src="' + themeData.modeBtn + '">';
+} else {
+modeBtnIcon.innerHTML = displayMode === 'fan' ? '🃏' : '📄';
+}
+
+// 牌组按钮
+var deckBtnIcon = document.getElementById('deckBtnIcon');
+if (themeData.deckBtn) {
+deckBtnIcon.innerHTML = '<img class="btn-custom-img" src="' + themeData.deckBtn + '">';
+} else {
+deckBtnIcon.innerHTML = '📚';
+}
+
+// 更新所有卡牌背面
+updateAllCardBacks();
+}
+
+// 更新所有卡牌背面
+function updateAllCardBacks() {
+var allCards = document.querySelectorAll('.card-back');
+for (var i = 0; i < allCards.length; i++) {
+var back = allCards[i];
+var existingImg = back.querySelector('.card-back-img');
+
+if (themeData.cardBack) {
+if (existingImg) {
+existingImg.src = themeData.cardBack;
+} else {
+var img = document.createElement('img');
+img.className = 'card-back-img';
+img.src = themeData.cardBack;
+back.appendChild(img);
+back.classList.add('has-custom-img');
+}
+} else {
+if (existingImg) {
+existingImg.remove();
+back.classList.remove('has-custom-img');
+}
+}
+}
+}
+
+// URL输入框变化时更新预览
+document.getElementById('urlTopBar').addEventListener('input', function() {
+updatePreviewIcon('previewTopBar', this.value, '📱');
+});
+document.getElementById('urlBottomDock').addEventListener('input', function() {
+updatePreviewIcon('previewBottomDock', this.value, '📱');});
+document.getElementById('urlTable').addEventListener('input', function() {
+updatePreviewIcon('previewTable', this.value, '🎴');
+});
+document.getElementById('urlCardBack').addEventListener('input', function() {
+updatePreviewIcon('previewCardBack', this.value, '🃏');
+});
+document.getElementById('urlSettingsBtn').addEventListener('input', function() {
+updatePreviewIcon('previewSettingsBtn', this.value, '⚙️');
+});
+document.getElementById('urlThemeBtn').addEventListener('input', function() {
+updatePreviewIcon('previewThemeBtn', this.value, '🎨');
+});
+document.getElementById('urlShuffleBtn').addEventListener('input', function() {
+updatePreviewIcon('previewShuffleBtn', this.value, '🌀');
+});
+document.getElementById('urlModeBtn').addEventListener('input', function() {
+updatePreviewIcon('previewModeBtn', this.value, '🃏');
+});
+document.getElementById('urlDeckBtn').addEventListener('input', function() {
+updatePreviewIcon('previewDeckBtn', this.value, '📚');
+});
+
+// 文件上传处理
+var fileInputs = document.querySelectorAll('.hidden-file-input[data-target]');
+for (var i = 0; i < fileInputs.length; i++) {
+fileInputs[i].addEventListener('change', handleFileUpload);
+}
+
+function handleFileUpload(e) {
+var file = e.target.files[0];
+var target = e.target.dataset.target;
+
+if (!file) return;
+
+if (file.size > 2 * 1024 * 1024) {
+alert('图片文件过大，请选择小于2MB的图片，或使用图片URL。');
+return;
+}
+
+var reader = new FileReader();
+reader.onload = function(event) {
+var dataUrl = event.target.result;
+
+switch(target) {
+case 'topBar':
+document.getElementById('urlTopBar').value = dataUrl;
+updatePreviewIcon('previewTopBar', dataUrl, '📱');
+break;
+case 'bottomDock':
+document.getElementById('urlBottomDock').value = dataUrl;
+updatePreviewIcon('previewBottomDock', dataUrl, '📱');
+break;
+case 'table':
+document.getElementById('urlTable').value = dataUrl;
+updatePreviewIcon('previewTable', dataUrl, '🎴');
+break;
+case 'cardBack':
+document.getElementById('urlCardBack').value = dataUrl;
+updatePreviewIcon('previewCardBack', dataUrl, '🃏');
+break;
+case 'settingsBtn':
+document.getElementById('urlSettingsBtn').value = dataUrl;
+updatePreviewIcon('previewSettingsBtn', dataUrl, '⚙️');
+break;
+case 'themeBtn':
+document.getElementById('urlThemeBtn').value = dataUrl;
+updatePreviewIcon('previewThemeBtn', dataUrl, '🎨');
+break;
+case 'shuffleBtn':
+document.getElementById('urlShuffleBtn').value = dataUrl;
+updatePreviewIcon('previewShuffleBtn', dataUrl, '🌀');
+break;
+case 'modeBtn':
+document.getElementById('urlModeBtn').value = dataUrl;
+updatePreviewIcon('previewModeBtn', dataUrl, '🃏');
+break;
+case 'deckBtn':
+document.getElementById('urlDeckBtn').value = dataUrl;
+updatePreviewIcon('previewDeckBtn', dataUrl, '📚');
+break;
+}
+};
+reader.readAsDataURL(file);
+e.target.value = '';
+}
+
+// 清除按钮处理
+var clearBtns = document.querySelectorAll('.theme-btn-clear');
+for (var i = 0; i < clearBtns.length; i++) {
+clearBtns[i].addEventListener('click', handleClearBtn);
+}
+
+function handleClearBtn(e) {
+var target = e.target.dataset.target;
+
+switch(target) {
+case 'topBar':
+document.getElementById('urlTopBar').value = '';
+updatePreviewIcon('previewTopBar', '', '📱');
+break;
+case 'bottomDock':
+document.getElementById('urlBottomDock').value = '';
+updatePreviewIcon('previewBottomDock', '', '📱');
+break;
+case 'table':
+document.getElementById('urlTable').value = '';
+updatePreviewIcon('previewTable', '', '🎴');
+break;
+case 'cardBack':
+document.getElementById('urlCardBack').value = '';
+updatePreviewIcon('previewCardBack', '', '🃏');
+break;
+case 'settingsBtn':
+document.getElementById('urlSettingsBtn').value = '';
+updatePreviewIcon('previewSettingsBtn', '', '⚙️');
+break;
+case 'themeBtn':
+document.getElementById('urlThemeBtn').value = '';
+updatePreviewIcon('previewThemeBtn', '', '🎨');
+break;
+case 'shuffleBtn':
+document.getElementById('urlShuffleBtn').value = '';
+updatePreviewIcon('previewShuffleBtn', '', '🌀');
+break;
+case 'modeBtn':
+document.getElementById('urlModeBtn').value = '';
+updatePreviewIcon('previewModeBtn', '', '🃏');
+break;
+case 'deckBtn':
+document.getElementById('urlDeckBtn').value = '';
+updatePreviewIcon('previewDeckBtn', '', '📚');
+break;
+}
+}
+
+// 保存主题设置
+document.getElementById('themeSaveBtn').addEventListener('click', function() {
+themeData.topBar = document.getElementById('urlTopBar').value.trim();
+themeData.bottomDock = document.getElementById('urlBottomDock').value.trim();
+themeData.table = document.getElementById('urlTable').value.trim();
+themeData.cardBack = document.getElementById('urlCardBack').value.trim();
+themeData.settingsBtn = document.getElementById('urlSettingsBtn').value.trim();
+themeData.themeBtn = document.getElementById('urlThemeBtn').value.trim();
+themeData.shuffleBtn = document.getElementById('urlShuffleBtn').value.trim();
+themeData.modeBtn = document.getElementById('urlModeBtn').value.trim();
+themeData.deckBtn = document.getElementById('urlDeckBtn').value.trim();
+
+saveThemeData();
+applyTheme();
+
+alert('✨ 主题设置已保存并应用！');
+});
+
+// 导出主题
+document.getElementById('exportThemeBtn').addEventListener('click', function() {
+var exportData = {
+version: '1.0',
+theme: themeData
+};
+
+var content = '=== 星之塔罗主题配置文件 ===\n';
+content += '版本: ' + exportData.version + '\n';
+content += '导出时间: ' + new Date().toLocaleString() + '\n';
+content += '\n=== 主题数据 ===\n';
+content += '顶栏背景: ' + (exportData.theme.topBar || '(未设置)') + '\n';
+content += '底栏背景: ' + (exportData.theme.bottomDock || '(未设置)') + '\n';
+content += '牌桌背景: ' + (exportData.theme.table || '(未设置)') + '\n';
+content += '牌组背面: ' + (exportData.theme.cardBack || '(未设置)') + '\n';
+content += '设置按钮: ' + (exportData.theme.settingsBtn || '(未设置)') + '\n';
+content += '主题按钮: ' + (exportData.theme.themeBtn || '(未设置)') + '\n';
+content += '洗牌按钮: ' + (exportData.theme.shuffleBtn || '(未设置)') + '\n';
+content += '多张按钮: ' + (exportData.theme.modeBtn || '(未设置)') + '\n';
+content += '牌组按钮: ' + (exportData.theme.deckBtn || '(未设置)') + '\n';
+content += '\n=== JSON数据(用于导入) ===\n';
+content += JSON.stringify(exportData);
+
+var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = '星之塔罗主题_' + new Date().getTime() + '.txt';
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+});
+
+// 导入主题
+document.getElementById('importThemeBtnTrigger').addEventListener('click', function() {
+document.getElementById('importThemeInput').click();
+});
+
+document.getElementById('importThemeInput').addEventListener('change', function(e) {
+var file = e.target.files[0];
+if (!file) return;
+
+var reader = new FileReader();
+reader.onload = function(event) {
+var content = event.target.result;
+
+try {
+var jsonMatch = content.match(/=== JSON数据\(用于导入\) ===\s*\n([\s\S]*?)$/);
+var jsonStr = jsonMatch ? jsonMatch[1].trim() : content.trim();
+
+var data = JSON.parse(jsonStr);
+
+if (data.theme) {
+themeData = data.theme;
+saveThemeData();
+applyTheme();
+updateThemeUI();
+alert('✨ 主题导入成功并已应用！');
+} else {
+alert('❌ 无效的主题文件格式');
+}
+} catch(err) {
+alert('❌ 解析主题文件失败：' + err.message);
+}
+};
+reader.readAsText(file);
+e.target.value = '';
+});
+
+// 保存为预设
+document.getElementById('savePresetBtn').addEventListener('click', function() {
+var name = document.getElementById('presetNameInput').value.trim();
+
+if (!name) {
+alert('请输入预设名称！');
+return;
+}
+
+for (var i = 0; i < presets.length; i++) {
+if (presets[i].name === name) {
+if (!confirm('已存在同名预设，是否覆盖？')) {
+return;
+}
+presets.splice(i, 1);
+break;
+}
+}
+
+var preset = {
+name: name,
+createdAt: new Date().toLocaleString(),
+theme: JSON.parse(JSON.stringify(themeData))
+};
+
+presets.push(preset);
+savePresets();
+updatePresetList();
+document.getElementById('presetNameInput').value = '';
+
+alert('✨ 预设 "' + name + '" 保存成功！');
+});
+
+// 更新预设列表
+function updatePresetList() {
+var listEl = document.getElementById('presetList');
+
+if (presets.length === 0) {
+listEl.innerHTML = '<div class="preset-empty">暂无预设，保存当前主题为预设吧！</div>';
+return;
+}
+
+var html = '';
+for (var i = 0; i < presets.length; i++) {
+var preset = presets[i];
+var isActive = (i === activePresetIndex);
+html += '<div class="preset-item' + (isActive ? ' active' : '') + '" data-index="' + i + '">';
+html += '<div class="preset-item-name"><span class="preset-icon">🎨</span>' + preset.name + '</div>';
+html += '<div class="preset-item-actions">';
+html += '<button class="preset-apply-btn" data-index="' + i + '">应用</button>';
+html += '<button class="preset-delete-btn" data-index="' + i + '">删除</button>';
+html += '</div>';
+html += '</div>';
+}
+
+listEl.innerHTML = html;
+
+var applyBtns = listEl.querySelectorAll('.preset-apply-btn');
+for (var i = 0; i < applyBtns.length; i++) {
+applyBtns[i].addEventListener('click', handleApplyPreset);
+}
+
+var deleteBtns = listEl.querySelectorAll('.preset-delete-btn');
+for (var i = 0; i < deleteBtns.length; i++) {
+deleteBtns[i].addEventListener('click', handleDeletePreset);
+}
+}
+
+function handleApplyPreset(e) {
+var index = parseInt(e.target.dataset.index);
+var preset = presets[index];
+
+if (!preset) return;
+
+themeData = JSON.parse(JSON.stringify(preset.theme));
+activePresetIndex = index;
+
+saveThemeData();
+applyTheme();
+updateThemeUI();
+updatePresetList();
+
+alert('✨ 预设 "' + preset.name + '" 已应用！');
+}
+
+function handleDeletePreset(e) {
+var index = parseInt(e.target.dataset.index);
+var preset = presets[index];
+
+if (!preset) return;
+
+if (!confirm('确定要删除预设 "' + preset.name + '" 吗？')) {
+return;
+}
+
+presets.splice(index, 1);
+
+if (activePresetIndex === index) {
+activePresetIndex = -1;
+} else if (activePresetIndex > index) {
+activePresetIndex--;
+}
+
+savePresets();
+updatePresetList();
+}
+
+// ========== 牌组设置功能 ==========
+
+// 打开牌组设置
+document.getElementById('deckBtn').addEventListener('click', function() {
+deckSettingsOverlay.classList.add('show');
+updateDeckSettingsUI();
+});
+
+// 关闭牌组设置
+document.getElementById('deckSettingsClose').addEventListener('click', function() {
+deckSettingsOverlay.classList.remove('show');
+});
+
+deckSettingsOverlay.addEventListener('click', function(e) {
+if (e.target === this) {
+deckSettingsOverlay.classList.remove('show');
+}
+});
+
+// 更新牌组设置界面
+function updateDeckSettingsUI() {
+// 更新下拉列表
+var select = document.getElementById('deckSelect');
+select.innerHTML = '<option value="default">默认塔罗牌组</option>';
+
+for (var i = 0; i < customDecks.length; i++) {
+var deck = customDecks[i];
+var option = document.createElement('option');
+option.value = deck.id;
+option.textContent = deck.name + ' (' + (deck.cards ? deck.cards.length : 0) + '张)';
+select.appendChild(option);
+}
+
+select.value = currentDeckId;
+
+// 更新已保存牌组列表
+updateSavedDecksList();
+}
+
+// 更新已保存牌组列表
+function updateSavedDecksList() {
+var listEl = document.getElementById('savedDecksList');
+
+if (customDecks.length === 0) {
+listEl.innerHTML = '<div class="no-decks-msg">暂无自定义牌组，点击上方按钮创建一个吧！</div>';
+return;
+}
+
+var html = '';
+for (var i = 0; i < customDecks.length; i++) {
+var deck = customDecks[i];
+var isActive = (deck.id === currentDeckId);
+
+html += '<div class="saved-deck-item' + (isActive ? ' active' : '') + '" data-index="' + i + '">';
+html += '<div class="saved-deck-info">';
+html += '<div class="saved-deck-preview">';
+if (deck.backUrl) {
+html += '<img src="' + deck.backUrl + '" alt="">';
+} else {
+html += '<span>🎴</span>';
+}
+html += '</div>';
+html += '<div class="saved-deck-details">';
+html += '<div class="saved-deck-name">' + deck.name + '</div>';
+html += '<div class="saved-deck-count">' + (deck.cards ? deck.cards.length : 0) + ' 张牌</div>';
+html += '</div>';
+html += '</div>';
+html += '<div class="saved-deck-actions">';
+html += '<button class="deck-edit-btn" data-index="' + i + '">编辑</button>';
+html += '<button class="deck-delete-btn" data-index="' + i + '">删除</button>';
+html += '</div>';
+html += '</div>';
+}
+
+listEl.innerHTML = html;
+
+// 绑定编辑和删除事件
+var editBtns = listEl.querySelectorAll('.deck-edit-btn');
+for (var i = 0; i < editBtns.length; i++) {
+editBtns[i].addEventListener('click', handleEditDeck);
+}
+
+var deleteBtns = listEl.querySelectorAll('.deck-delete-btn');
+for (var i = 0; i < deleteBtns.length; i++) {
+deleteBtns[i].addEventListener('click', handleDeleteDeck);
+}
+}
+
+// 应用牌组
+document.getElementById('deckApplyBtn').addEventListener('click', function() {
+var select = document.getElementById('deckSelect');
+var deckId = select.value;
+
+loadDeck(deckId);
+initDeck();
+applyTheme();
+
+alert('✨ 牌组已应用！');
+deckSettingsOverlay.classList.remove('show');
+});
+
+// 打开上传牌组界面
+document.getElementById('uploadDeckBtn').addEventListener('click', function() {
+editingDeckIndex = -1;
+editingCards = [];
+
+// 添加一张默认牌
+editingCards.push({
+name: '',
+frontUrl: '',
+descUp: '',
+descRev: '',
+isMajor: true
+});
+
+document.getElementById('deckNameInput').value = '';
+document.getElementById('deckBackUrlInput').value = '';
+
+renderEditingCards();
+uploadDeckOverlay.classList.add('show');
+});
+
+// 编辑牌组
+function handleEditDeck(e) {
+var index = parseInt(e.target.dataset.index);
+var deck = customDecks[index];
+
+if (!deck) return;
+
+editingDeckIndex = index;
+editingCards = [];
+
+if (deck.cards) {
+for (var i = 0; i < deck.cards.length; i++) {
+editingCards.push(JSON.parse(JSON.stringify(deck.cards[i])));
+}
+}
+
+document.getElementById('deckNameInput').value = deck.name || '';
+document.getElementById('deckBackUrlInput').value = deck.backUrl || '';
+
+renderEditingCards();
+uploadDeckOverlay.classList.add('show');
+}
+
+// 删除牌组
+function handleDeleteDeck(e) {
+var index = parseInt(e.target.dataset.index);
+var deck = customDecks[index];
+
+if (!deck) return;
+
+if (!confirm('确定要删除牌组 "' + deck.name + '" 吗？')) {
+return;
+}
+
+// 如果删除的是当前使用的牌组，切换到默认
+if (deck.id === currentDeckId) {
+loadDeck('default');
+initDeck();
+applyTheme();
+}
+
+customDecks.splice(index, 1);
+saveCustomDecks();
+updateDeckSettingsUI();
+}
+
+// 渲染编辑中的牌面列表
+function renderEditingCards() {
+var container = document.getElementById('cardsListContainer');
+var html = '';
+
+for (var i = 0; i < editingCards.length; i++) {
+var card = editingCards[i];
+html += '<div class="card-edit-item" data-index="' + i + '">';
+html += '<button class="card-delete-btn" data-index="' + i + '">✕</button>';
+
+html += '<div class="card-preview-col">';
+html += '<div class="card-preview-box">';
+if (card.frontUrl) {
+html += '<img src="' + card.frontUrl + '" alt="">';
+} else {
+html += '<span>🎴</span>';
+}
+html += '</div>';
+html += '<input type="text" class="card-front-input" data-index="' + i + '" data-field="frontUrl" placeholder="牌面图片URL" value="' + (card.frontUrl || '') + '">';
+html += '</div>';
+
+html += '<div class="card-info-col">';
+
+html += '<div class="card-info-row">';
+html += '<div class="card-info-field">';
+html += '<label>牌名</label>';
+html += '<input type="text" data-index="' + i + '" data-field="name" value="' + (card.name || '') + '" placeholder="输入牌名...">';
+html += '</div>';
+html += '<div class="card-info-field">';
+html += '<label>大小牌</label>';
+html += '<select class="card-type-select" data-index="' + i + '" data-field="isMajor">';
+html += '<option value="true"' + (card.isMajor !== false ? ' selected' : '') + '>大阿卡纳</option>';
+html += '<option value="false"' + (card.isMajor === false ? ' selected' : '') + '>小阿卡纳</option>';
+html += '</select>';
+html += '</div>';
+html += '</div>';
+
+html += '<div class="card-info-field">';
+html += '<label>正位含义</label>';
+html += '<textarea data-index="' + i + '" data-field="descUp" placeholder="输入正位含义...">' + (card.descUp || '') + '</textarea>';
+html += '</div>';
+
+html += '<div class="card-info-field">';
+html += '<label>逆位含义</label>';
+html += '<textarea data-index="' + i + '" data-field="descRev" placeholder="输入逆位含义...">' + (card.descRev || '') + '</textarea>';
+html += '</div>';
+
+html += '</div>';
+html += '</div>';
+}
+
+container.innerHTML = html;
+
+// 绑定输入事件
+var inputs = container.querySelectorAll('input, textarea, select');
+for (var i = 0; i < inputs.length; i++) {
+inputs[i].addEventListener('input', handleCardFieldChange);
+inputs[i].addEventListener('change', handleCardFieldChange);
+}
+
+// 绑定删除事件
+var deleteBtns = container.querySelectorAll('.card-delete-btn');
+for (var i = 0; i < deleteBtns.length; i++) {
+deleteBtns[i].addEventListener('click', handleDeleteCard);
+}
+}
+
+// 处理牌面字段变化
+function handleCardFieldChange(e) {
+var index = parseInt(e.target.dataset.index);
+var field = e.target.dataset.field;
+var value = e.target.value;
+
+if (field === 'isMajor') {
+value = (value === 'true');
+}
+
+editingCards[index][field] = value;
+
+// 如果是图片URL，更新预览
+if (field === 'frontUrl') {
+var previewBox = e.target.parentElement.querySelector('.card-preview-box');
+if (value) {
+previewBox.innerHTML = '<img src="' + value + '" alt="">';
+} else {
+previewBox.innerHTML = '<span>🎴</span>';
+}
+}
+}
+
+// 删除牌面
+function handleDeleteCard(e) {
+var index = parseInt(e.target.dataset.index);
+
+if (editingCards.length <= 1) {
+alert('至少需要保留一张牌！');
+return;
+}
+
+editingCards.splice(index, 1);
+renderEditingCards();
+}
+
+// 添加牌面
+document.getElementById('addCardBtn').addEventListener('click', function() {
+editingCards.push({
+name: '',
+frontUrl: '',
+descUp: '',
+descRev: '',
+isMajor: true
+});
+renderEditingCards();
+
+// 滚动到底部
+var container = document.getElementById('cardsListContainer');
+container.scrollTop = container.scrollHeight;
+});
+
+// 批量导出
+document.getElementById('batchExportBtn').addEventListener('click', function() {
+var deckName = document.getElementById('deckNameInput').value.trim() || '未命名牌组';
+var backUrl = document.getElementById('deckBackUrlInput').value.trim();
+
+var content = '=== 星之塔罗牌组导出 ===\n';
+content += '牌组名称：' + deckName + '\n';
+content += '牌背URL：' + (backUrl || '(未设置)') + '\n';
+content += '导出时间：' + new Date().toLocaleString() + '\n';
+content += '牌面数量：' + editingCards.length + '\n';
+content += '\n=== 牌面数据 ===\n\n';
+
+for (var i = 0; i < editingCards.length; i++) {
+var card = editingCards[i];
+content += '--- 第 ' + (i + 1) + ' 张 ---\n';
+content += '牌面URL：' + (card.frontUrl || '(未设置)') + '\n';
+content += '牌名：' + (card.name || '(未设置)') + '\n';
+content += '正位：' + (card.descUp || '(未设置)') + '\n';
+content += '逆位：' + (card.descRev || '(未设置)') + '\n';
+content += '大小牌：' + (card.isMajor !== false ? '大阿卡纳' : '小阿卡纳') + '\n\n';
+}
+
+var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+var url = URL.createObjectURL(blob);
+var a = document.createElement('a');
+a.href = url;
+a.download = deckName + '_' + new Date().getTime() + '.txt';
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+
+alert('✨ 牌组已导出！');
+});
+
+// 批量导入
+document.getElementById('batchImportBtn').addEventListener('click', function() {
+document.getElementById('batchImportInput').click();
+});
+
+document.getElementById('batchImportInput').addEventListener('change', function(e) {
+var file = e.target.files[0];
+if (!file) return;
+
+var reader = new FileReader();
+reader.onload = function(event) {
+var content = event.target.result;
+parseDeckImport(content);
+};
+reader.readAsText(file);
+e.target.value = '';
+});
+
+// 解析导入内容 - 兼容性强的解析器
+function parseDeckImport(content) {
+// 提取牌组名称
+var deckNameMatch = content.match(/牌组名称[：:]\s*(.+?)(?:\n|牌背|$)/i);
+if (deckNameMatch) {
+document.getElementById('deckNameInput').value = deckNameMatch[1].trim();
+}
+
+// 提取牌背URL
+var backUrlMatch = content.match(/牌背(?:URL)?[：:]\s*(.+?)(?:\n|牌面|导出|$)/i);
+if (backUrlMatch && backUrlMatch[1].trim() !== '(未设置)') {
+document.getElementById('deckBackUrlInput').value = backUrlMatch[1].trim();
+}
+
+// 解析牌面数据
+var cards = [];
+
+// 尝试多种分隔方式
+var cardBlocks = content.split(/---\s*第\s*\d+\s*张\s*---/i);
+if (cardBlocks.length <= 1) {
+// 尝试其他分隔方式
+cardBlocks = content.split(/\n(?=牌面URL[：:]|牌名[：:])/i);
+}
+
+for (var i = 0; i < cardBlocks.length; i++) {
+var block = cardBlocks[i];
+if (!block.trim()) continue;
+
+var card = {
+name: '',
+frontUrl: '',
+descUp: '',
+descRev: '',
+isMajor: true
+};
+
+// 提取牌面URL
+var frontUrlMatch = block.match(/牌面(?:URL)?[：:]\s*(.+?)(?:\n|牌名|$)/i);
+if (frontUrlMatch && frontUrlMatch[1].trim() !== '(未设置)') {
+card.frontUrl = frontUrlMatch[1].trim();
+}
+
+// 提取牌名
+var nameMatch = block.match(/牌名[：:]\s*(.+?)(?:\n|正位|$)/i);
+if (nameMatch && nameMatch[1].trim() !== '(未设置)') {
+card.name = nameMatch[1].trim();
+}
+
+// 提取正位含义
+var upMatch = block.match(/正位[：:]\s*(.+?)(?:\n|逆位|$)/i);
+if (upMatch && upMatch[1].trim() !== '(未设置)') {
+card.descUp = upMatch[1].trim();
+}
+
+// 提取逆位含义
+var revMatch = block.match(/逆位[：:]\s*(.+?)(?:\n|大小牌|$)/i);
+if (revMatch && revMatch[1].trim() !== '(未设置)') {
+card.descRev = revMatch[1].trim();
+}
+
+// 提取大小牌
+var typeMatch = block.match(/大小牌[：:]\s*(.+?)(?:\n|$)/i);
+if (typeMatch) {
+card.isMajor = (typeMatch[1].trim().indexOf('小') === -1);
+}
+
+// 只有有实质内容的牌才添加
+if (card.name || card.frontUrl || card.descUp || card.descRev) {
+cards.push(card);
+}
+}
+
+if (cards.length > 0) {
+editingCards = cards;
+renderEditingCards();
+alert('✨ 成功导入 ' + cards.length + ' 张牌！');
+} else {
+alert('❌ 未能解析出任何牌面数据，请检查格式。');
+}
+}
+
+// 保存牌组
+document.getElementById('deckSaveBtn').addEventListener('click', function() {
+var deckName = document.getElementById('deckNameInput').value.trim();
+var backUrl = document.getElementById('deckBackUrlInput').value.trim();
+
+if (!deckName) {
+alert('请输入牌组名称！');
+return;
+}
+
+if (editingCards.length === 0) {
+alert('请至少添加一张牌！');
+return;
+}
+
+var deck;
+if (editingDeckIndex >= 0) {
+// 编辑现有牌组
+deck = customDecks[editingDeckIndex];
+deck.name = deckName;
+deck.backUrl = backUrl;
+deck.cards = JSON.parse(JSON.stringify(editingCards));
+deck.updatedAt = new Date().toLocaleString();
+} else {
+// 新建牌组
+deck = {
+id: 'deck_' + new Date().getTime(),
+name: deckName,
+backUrl: backUrl,
+cards: JSON.parse(JSON.stringify(editingCards)),
+createdAt: new Date().toLocaleString()
+};
+customDecks.push(deck);
+}
+
+saveCustomDecks();
+updateDeckSettingsUI();
+
+alert('✨ 牌组 "' + deckName + '" 保存成功！');
+});
+
+// 退出上传牌组界面 - 双重确认
+var exitConfirmStep = 0;
+
+document.getElementById('deckExitBtn').addEventListener('click', function() {
+exitConfirmStep = 1;
+document.getElementById('confirmText').textContent = '请确认你已经上传并保存好牌组了哦';
+confirmModal.classList.add('show');
+});
+
+document.getElementById('confirmYes').addEventListener('click', function() {
+if (exitConfirmStep === 1) {
+exitConfirmStep = 2;
+document.getElementById('confirmText').textContent = '您真的保存好牌组了吗？';
+} else if (exitConfirmStep === 2) {
+exitConfirmStep = 0;
+confirmModal.classList.remove('show');
+uploadDeckOverlay.classList.remove('show');
+editingCards = [];
+editingDeckIndex = -1;
+}
+});
+
+document.getElementById('confirmNo').addEventListener('click', function() {
+exitConfirmStep = 0;
+confirmModal.classList.remove('show');
+});
+
+confirmModal.addEventListener('click', function(e) {
+if (e.target === this) {
+exitConfirmStep = 0;
+confirmModal.classList.remove('show');
+}
+});
+
+// 初始化时应用主题
+if (themeData.topBar || themeData.bottomDock || themeData.table || themeData.cardBack ||
+themeData.settingsBtn || themeData.themeBtn || themeData.shuffleBtn || themeData.modeBtn || themeData.deckBtn) {
+setTimeout(function() {
+if (page2.style.display === 'flex') {
+applyTheme();
+}
+}, 100);
+}
+</script>
+</body>
+</html>
